@@ -10,7 +10,6 @@ runs <- lapply(files, load.simoutput)
 nloci <- runs[[1]]$par$loci
 sum.het <- numeric(runs[[1]]$par$times+1)
 
-i <- 1
 for (i in 1:length(runs)) {
   for (l in 1:nloci) {
     p <- runs[[i]]$freq[[l]]$freq
