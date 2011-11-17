@@ -20,8 +20,10 @@
 #define OPTS          305
 #define TIMES         306
 #define EFFECT_PROBS  307
+#define FREQS         308
 
 using std::cerr;
+using std::cin;
 using std::endl;
 using std::ostream;
 using std::string;
@@ -35,8 +37,21 @@ void valdouble_from_string(const char *s, valarray<double> &x);
 void valint_from_string(const string &s, valarray<int> &x);
 void valint_from_string(const char *s, valarray<int> &x);
 
+/* a map to make converting from model string to constant easier */
+static map<string,Model> model_lookup;
+string model_reverse_lookup[] = { string("unspecified"), string("infinite"), string("finite") };
+
+static map<string,freq_input> freq_lookup;
+string freq_reverse_lookup[2] = { string("file"), string("even") };
+
+
 /* set default options */
 Args::Args(int argc, char *argv[]) {
+
+  model_lookup[string("infinite")] = infinite_sites;
+  model_lookup[string("finite")] = finite_sites;
+  freq_lookup[string("file")] = freqfile;
+  freq_lookup[string("even")] = freqeven;
 
   /* defaults */
   popsize = 5000;
@@ -46,14 +61,10 @@ Args::Args(int argc, char *argv[]) {
   env = 0.0;
   rand_seed = 0;
   sites_model = unspecified;
+  freqin = freqfile;
 
   /* process all the arguments from argv[] */
   int c;
-
-  /* a map to make converting from model string to constant easier */
-  map<string,Model> model_lookup;
-  model_lookup[string("infinite")] = infinite_sites;
-  model_lookup[string("finite")] = finite_sites;
 
   /* re-create the original command line as best we can */
   string sep("");
@@ -100,6 +111,7 @@ Args::Args(int argc, char *argv[]) {
       {"opts", required_argument, 0, OPTS},
       {"times", required_argument, 0, TIMES},
       {"eprobs", required_argument, 0, EFFECT_PROBS},
+      {"freqs", required_argument, 0, FREQS},
       {"model", required_argument, 0, 'm'},
       {0, 0, 0, 0}
     };
@@ -131,6 +143,14 @@ Args::Args(int argc, char *argv[]) {
         if (model_lookup.count(string(optarg)) == 0)
           throw SimUsageError("invalid model");
         sites_model = model_lookup[string(optarg)];
+        break;
+
+      case FREQS:
+        if (!has_option(optarg))
+          throw SimUsageError("must specify starting frequencies");
+        if (freq_lookup.count(string(optarg)) == 0)
+          throw SimUsageError("invalid frequency strategy");
+        freqin = freq_lookup[string(optarg)];
         break;
 
       case 'u':
@@ -272,6 +292,7 @@ Args::Args(int argc, char *argv[]) {
     default:
         throw SimUsageError("invalid sites model");
   }
+  nloci = (int)loci_counts.sum();
 
   /* initialize the random number generator */
   srand48(rand_seed);
@@ -304,7 +325,8 @@ ostream& operator<<(ostream &s, const Args &a) {
     << " mu=" << a.mu
     << " s=" << a.s
     << " env=" << a.env
-    << " model=" << a.sites_model
+    << " model=\"" << model_reverse_lookup[a.sites_model] << "\""
+    << " freqs=\"" << freq_reverse_lookup[a.freqin] << "\""
     << " burnin=" << a.burnin;
 
   string tmp;
@@ -317,6 +339,32 @@ ostream& operator<<(ostream &s, const Args &a) {
     s << " " << print_r_vector(a.effect_probabilities, "eprobs", tmp);
   return s;
 }
+
+/* I use this function to fetch the next allele frequency. In addition to 
+ * passing these as standard input, I'm implementing a few stock ways that 
+ * these can be started. That way execution is not dependent on some file 
+ * that may or may not be subsequently deleted or forgotten which was was 
+ * used.
+ * This function returns negative when it's out of frequencies. */
+double Args::get_initial_frequency(void) {
+  static double delivered = 0;
+  double f;
+  switch (freqin) {
+    case freqfile:
+      cin >> f;
+      if (cin.eof() != 0) return -1;
+      break;
+    case freqeven:
+      if (delivered == nloci) return -1;
+      f = (delivered+1) / (nloci+1);
+      break;
+    default:
+      throw SimError("invalid frequency initiation strategy");
+  }
+  delivered++;
+  return f;
+}
+
 
 /* split a string by sep filling the vector */
 void strsplit(const string &s, vector<string> &res, char sep) {

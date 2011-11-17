@@ -41,7 +41,6 @@ main(int argc, char **argv) { try {
   cout << ar << endl;
 
   /* set up simulation-wide genome parameters */
-  int nloci = (int)ar.loci_counts.sum();
   Genome::initialize(ar.mu, 2.0/ar.s, ar.opts[0], ar.env);
   Population::initialize(ar.popsize, ar.sites_model);
   /* set the optimum to the first one */
@@ -69,20 +68,22 @@ main(int argc, char **argv) { try {
   }
 
   /* initial frequencies, read in from standard input */
-  if (nloci > 0) {
-    valarray<int> heterozygotes(nloci);
-    valarray<int> derived_homozygotes(nloci);
+  if (ar.nloci > 0) {
+    valarray<int> heterozygotes(ar.nloci);
+    valarray<int> derived_homozygotes(ar.nloci);
     double f;
     int loc = 0;
     while (1) {
-      cin >> f;
-      if (cin.eof() != 0 || loc == nloci) break;
+      /* this function works like a generator, so we can call it repeatedly. 
+       * It return -1 when it's done generating */
+      f = ar.get_initial_frequency();
+      if (f < 0 || loc == ar.nloci) break;
       heterozygotes[loc] = (int)round(2.0*f*(1.0-f)*ar.popsize);
       derived_homozygotes[loc] = (int)round(f*f*ar.popsize);
       loc++;
     }
-    if (!(cin.eof() && loc == nloci)) 
-      throw SimError(0, "incorrect number of frequencies on stdin. I got more than %d frequencies.", nloci);
+    if (!(f < 0 && loc == ar.nloci)) 
+      throw SimError(0, "incorrect number of frequencies. Expecting %d.", ar.nloci);
   
     /* initialize the first with the initial genotypes */
     pops[0].setup_initial_genotypes(heterozygotes, derived_homozygotes);
@@ -93,7 +94,6 @@ main(int argc, char **argv) { try {
    * make the code as readable as possible */
   int parent_pop = 0;
 
-  cout << pops[0] << endl;
   /* epochs correspond to periods between which opt is constant and across which it changes */
   int gen = 0;
   for (int epoch=0; epoch < (int)ar.times.size(); epoch++) {
@@ -161,6 +161,10 @@ usage(void) {
     << "  --loci=<int>          number of loci to start the simulation (provided on stdin)\n"
     << "Finite-sites-specific options:\n"
     << "  --loci=<int vec>      number of loci of each effect size (comma-separated)\n"
+    << "Initial frequency initialization:\n"
+    << "  --freqs file | even   method for initializing frequencies\n"
+    << "      file: read in frequencies from a file\n"
+    << "      even: evenly spaced. ith freq is i/(1+n) where n is the number of loci\n"
     << "\n";
   return;
 }
