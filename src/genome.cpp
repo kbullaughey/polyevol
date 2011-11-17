@@ -20,7 +20,7 @@ double Genome::mu;
 double Genome::environmental_noise;
 double Genome::optimum;
 double Genome::sig;
-double Genome::shift;
+double Genome::baseline;
 
 /* A new genome is created with no mutant alleles */
 Genome::Genome(Population *p, int indiv) { 
@@ -37,6 +37,7 @@ Genome::initialize(double u, double sg, double opt, double env) {
   sig = sg;
   optimum = opt;
   environmental_noise = env;
+  baseline = 0;
   return;
 }
 
@@ -58,9 +59,9 @@ Genome::clear(void) {
 /* compute the combined genotype contribution to phenotype */
 double 
 Genome::genvalue(void) {
-  double sum = 0.0;
+  double sum = baseline;
   for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++) 
-    sum += (pop->sites[*it][individual] + shift) * pop->sites[*it].effect;
+    sum += pop->sites[*it][individual] * pop->sites[*it].effect;
   return sum;
 }
 
@@ -147,7 +148,6 @@ std::valarray<double> GenomeInfiniteSites::effect_sizes;
 std::valarray<double> GenomeInfiniteSites::effect_probabilities;
 
 GenomeInfiniteSites::GenomeInfiniteSites(Population *p, int indiv) : Genome(p, indiv) { 
-  shift = 0;
 }
 
 /* Set up the class globals. This allows us to keep track of some constants
@@ -220,7 +220,6 @@ GenomeInfiniteSites::mutate_site(mutation_loc loc, double direction) {
  ************************************************/
 
 GenomeFiniteSites::GenomeFiniteSites(Population *p, int indiv) : Genome(p, indiv) { 
-  shift = -1;
 }
 
 /* mutate a random site */

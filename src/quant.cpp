@@ -57,8 +57,14 @@ main(int argc, char **argv) { try {
   } else {
     /* loop over loci counts for each effect size and make a site with this effect */
     for (int i=0; i < (int)ar.loci_counts.size(); i++) {
-      for (int j=0; j < ar.loci_counts[i]; j++) 
+      for (int j=0; j < ar.loci_counts[i]; j++) {
         Population::create_site(ar.effect_sizes[i]);
+        /* unlike the Barton model, I represent genotypes 0,1,2 instead of 
+         * -1,0,1. This means I need to store the baseline of the genotype 
+         * that is entirely homozygote ancestral, and add the effects of 
+         * derived alleles on top of that */
+        GenomeFiniteSites::baseline -= ar.effect_sizes[i];
+      }
     }
   }
 
@@ -87,6 +93,7 @@ main(int argc, char **argv) { try {
    * make the code as readable as possible */
   int parent_pop = 0;
 
+  cout << pops[0] << endl;
   /* epochs correspond to periods between which opt is constant and across which it changes */
   int gen = 0;
   for (int epoch=0; epoch < (int)ar.times.size(); epoch++) {

@@ -46,6 +46,11 @@ public:
   double fitness;
   double phenotype;
 
+  /* Since I only keep track of derived alleles, the baseline genvalue needs 
+   * to be sum_i(-a_i) so that a genome that is entirely homozygotes ancestral,
+   * has the correct genvalue */
+  static double baseline;
+
 protected:
   /* list of sites containing one or more derived allele in this individual */
   std::vector<mutation_loc> mutant_sites;
@@ -62,10 +67,6 @@ protected:
   static double environmental_noise;
   static double optimum;
   static double sig;
-
-  /* for the finite sites model genotypes are shifted to -1,0,1 and for the 
-   * infinite sites model this stays 0,1,2 */
-  static double shift;
 };
 
 /************************************************** 
