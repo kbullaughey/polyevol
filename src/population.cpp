@@ -198,4 +198,16 @@ operator<<(ostream &s, const Population &p) {
   return s;
 }
 
+/* this is used in the infinite sites model to remember a site is fixed, and 
+ * that way we don't need to keep track of it. This can be done by adjusting 
+ * the population baseline phenotype. The judgement is made on one population
+ * but the sites tables need to be updated for each population view */
+// TODO: finish this. Don't forget to remove the sites from the Genomes
+//void Population::assimilate_fixed(void) {
+//  /* find any sites that have fixed */
+//  for (mutation_loc i=0 i < sites.size(); i++) {
+//  }
+//}
+
+
 /* END */
