@@ -333,8 +333,7 @@ ostream& operator<<(ostream &s, const Args &a) {
   s << " " << print_r_vector(a.effect_sizes, "effects", tmp);
   s << " " << print_r_vector(a.opts, "opts", tmp);
   s << " " << print_r_vector(a.times, "times", tmp);
-  if (a.sites_model == finite_sites)
-    s << " " << print_r_vector(a.loci_counts, "loci", tmp);
+  s << " " << print_r_vector(a.loci_counts, "loci", tmp);
   if (a.sites_model == infinite_sites)
     s << " " << print_r_vector(a.effect_probabilities, "eprobs", tmp);
   return s;
