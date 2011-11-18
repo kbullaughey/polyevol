@@ -21,11 +21,11 @@ fi
 reps=$2
 
 for i in `seq 1 $reps`; do 
-  if [ ! -d out/$s/$i ] ; then
-    mkdir -p out/$s/$i
+  if [ ! -d out-finite/$s/$i ] ; then
+    mkdir -p out-finite/$s/$i
   fi
   $quant -m finite -s $s --freqs=even -N 1000 --times=1000 --seed=$seed --opt=1 --effects=1 \
-    --loci=25 --burnin=0 > out/$s/$i/burnin.$JOB_ID.out
+    --loci=25 --burnin=0 > out-finite/$s/$i/burnin.$JOB_ID.out
 done
 
 # END

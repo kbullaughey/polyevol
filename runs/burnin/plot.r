@@ -1,17 +1,20 @@
 library(grid)
 source("../../src/r/evolveq.R")
 
+the.args <- commandArgs()
+model <- sub("--model=", "", the.args[grep("--model=", the.args)])
+
 # read in output files
-pip <- pipe("find . -name 'burnin*.out'", "r")
+pip <- pipe(paste("find out-", model, " -name 'burnin*.out'", sep=""), "r")
 files <- scan(pip, what="", sep="\n")
 close(pip)
 
 runs <- lapply(files, load.simoutput)
-save.image(file="burnin_plot_data.rimage")
+save.image(file=paste("burnin_plot_data-", model, ".rimage", sep=""))
 
 nloci <- runs[[1]]$par$loci
 generations <- runs[[1]]$par$times
-file.s <- as.numeric(sub("^.*out/([.0-9]*)/.*$", "\\1", files))
+file.s <- as.numeric(sub("^.*out-[a-z]*/([.0-9]*)/.*$", "\\1", files))
 runs.split <- split(runs, file.s)
 num.s <- length(runs.split)
 
@@ -33,7 +36,7 @@ max.het <- max(unlist(sum.hets))
 palette(terrain.colors(num.s+2)[1:num.s])
 
 # plot sum (over loci) heterozygosity as a function of generation for each s
-pdf(file="burnin_sum_heterozygosity.pdf", width=6, height=4)
+pdf(file=paste("burnin_sum_heterozygosity-", model, ".pdf", sep=""), width=6, height=4)
 pushViewport(viewport())
   pushViewport(viewport(x=0.95, y=0.95, just=c(1,1), height=0.75, width=0.8))
     pushViewport(viewport(xscale=c(0,generations), yscale=c(0,max.het)))
@@ -72,7 +75,7 @@ sum.hets.indiv <- lapply(runs.split, function(run.set) {
 })
 max.het.indiv <- max(unlist(sum.hets.indiv))
 
-pdf(file="burnin_sum_heterozygosity-individual.pdf", width=6, height=4)
+pdf(file=paste("burnin_sum_heterozygosity-individual-", model, ".pdf", sep=""), width=6, height=4)
 pushViewport(viewport())
   pushViewport(viewport(x=0.95, y=0.95, just=c(1,1), height=0.75, width=0.8))
     pushViewport(viewport(xscale=c(0,generations), yscale=c(0,max.het.indiv)))

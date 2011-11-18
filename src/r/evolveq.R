@@ -113,6 +113,8 @@ plot.freqs <- function(run, pdf.file="out.pdf", resolution=500, color.by="all") 
         id <- names(run$freq)[i]
         g <- run$freq[[i]]$gen
         f <- run$freq[[i]]$freq
+        g <- g[f < 1]
+        f <- f[f < 1]
         idx <- reduce.index(f, len=resolution)
         grid.lines(g[idx], f[idx], gp=gpar(col=color.id[[id]]), default.units="native") 
       })
