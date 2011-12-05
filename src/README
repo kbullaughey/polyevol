@@ -1,0 +1,10 @@
+Try this once inside the 'src' directory:
+
+make
+cd examples
+./run.sh
+
+The above requires that you have g++ and R installed.
+
+Kevin Bullaughey
+Fri, Nov 11 2011
