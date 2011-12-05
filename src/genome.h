@@ -51,6 +51,9 @@ public:
    * has the correct genvalue */
   static double baseline;
 
+  /* I keep a counter of how many mutations occur */
+  static int mutation_count;
+
 protected:
   /* list of sites containing one or more derived allele in this individual */
   std::vector<mutation_loc> mutant_sites;
