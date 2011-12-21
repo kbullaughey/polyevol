@@ -1,11 +1,11 @@
 /*
- *  qapprox2.c
+ *  qapprox.c
  *  
  *
  *  Created by Richard Hudson on 8/1/11.
  *
  */
-/* gcc -o qapprox2 qapprox2.c  -lm -lgsl */
+/* gcc -o qapprox qapprox.c  -lm -lgsl */
 
 #include <stdio.h>
 #include <math.h>
@@ -13,7 +13,7 @@
 #include "gsl/gsl_rng.h"
 #include "gsl/gsl_randist.h"
 
-#   alphas come from the file:   "alphas",    initial frequencies from stdin  
+// alphas come from the file:   "alphas",    initial frequencies from stdin  
 
 
 main(int argc, char **argv )
@@ -28,7 +28,7 @@ double s,  alpha, sum , sumsq,  env, initfreq1, *freqinit  ;
 double *effects,  opt, sig , fitmax, mutrate, *freqsp, *freqsoff , *ptemp ;
 double var, meanphen, sumpa, suma, delta, pprime ;
 
-if( argc < 7 ) { fprintf( stderr, " qapprox2  popsize nloci optimum  s(strength of selection) ngen  mutrate \n"); exit(1); }
+if( argc < 7 ) { fprintf( stderr, " qapprox  popsize nloci optimum  s(strength of selection) ngen  mutrate \n"); exit(1); }
 popsize = strtol( argv[1],NULL,10);
 nloci = strtol( argv[2],NULL,10);
 opt = strtod( argv[3],NULL);

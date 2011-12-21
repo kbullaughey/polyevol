@@ -14,10 +14,13 @@ CFLAGS += -O3
 endif
 endif
 
-all: quant
+all: quant qapprox
 
 quant: $(OBJS) $(HEADERS)
 	$(CC) $(CFLAGS) $(INC) $(LIBS) -o $@ $(OBJS)
+
+qapprox: qapprox.c
+	gcc -o qapprox qapprox.c  -lm -lgsl
 
 %.o: %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@ 
