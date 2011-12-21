@@ -139,6 +139,16 @@ Genome::mutate_genome(void) {
   return;
 }
 
+/* Remove all mutations corresponding to derived alleles at site loc.
+ * This function is assuming that someone else is doing the book-keeping 
+ * for sites[] */
+void
+Genome::purge_site(mutation_loc loc) {
+  vector<mutation_loc>::iterator new_end = remove(mutant_sites.begin(), mutant_sites.end(), loc);
+  if (new_end != mutant_sites.end())
+    mutant_sites.erase(new_end, mutant_sites.end());
+}
+
 /************************************************** 
  * Genome implementation for infinite sites model *
  **************************************************/

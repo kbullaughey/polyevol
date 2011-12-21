@@ -95,16 +95,16 @@ main(int argc, char **argv) { try {
   int parent_pop = 0;
 
   /* epochs correspond to periods between which opt is constant and across which it changes */
-  int gen = 0;
+  Population::generation = 0;
   for (int epoch=0; epoch < (int)ar.times.size(); epoch++) {
     /* update the optimum, for the first epoch, this has been done above */
     if (epoch > 0) Genome::new_optimum(ar.opts[epoch]);
 
-    while (gen < ar.times[epoch]) {
+    while (Population::generation < ar.times[epoch]) {
       /* only print output if we've discarded the burnin */
       if (ar.burnin <= 0) {
-        cout << "gen: " << gen << " "; pops[parent_pop].print_frequency_summary();
-        cout << "gen: " << gen << " "; pops[parent_pop].print_phenotype_summary();
+        cout << "gen: " << Population::generation << " "; pops[parent_pop].print_frequency_summary();
+        cout << "gen: " << Population::generation << " "; pops[parent_pop].print_phenotype_summary();
       } 
 
       /* advance the population simulation one generation */
@@ -115,8 +115,10 @@ main(int argc, char **argv) { try {
         pops[OFFSPRING_POP].purge_lost();
     
       /* generations start counting after the burnin is over */
+      if (ar.burnin == 0)
+        cout << "end burnin" << endl;
       if (ar.burnin <= 0) {
-        gen++;
+        Population::generation++;
       } else {
         ar.burnin--;
       }
@@ -127,8 +129,8 @@ main(int argc, char **argv) { try {
   } /* end of main loop */
 
   /* print the final state */
-  cout << "gen: " << gen << " "; pops[parent_pop].print_frequency_summary();
-  cout << "gen: " << gen << " "; pops[parent_pop].print_phenotype_summary();
+  cout << "gen: " << Population::generation << " "; pops[parent_pop].print_frequency_summary();
+  cout << "gen: " << Population::generation << " "; pops[parent_pop].print_phenotype_summary();
 
 /* catch any errors that were thrown anywhere inside this block */
 } catch (SimUsageError e) {

@@ -9,11 +9,12 @@ using std::ostream;
 /* storage for (static) class variables */
 mutation_id Site::next_unique_id = 0;
 
-Site::Site(int N, double e, mutation_id sid) : genotypes(N) {
+Site::Site(int N, double e, mutation_id sid, int gen) : genotypes(N) {
   effect = e;
   derived_alleles_count = 0;
   reusable = false;
   id = sid;
+  generation_created = gen;
 }
 
 /* get a particular individual's genotype at this site */
@@ -37,12 +38,19 @@ double Site::frequency(void) {
 }
 
 /* take a site that was lost and use it for a new mutation */
-void Site::renew(double e, mutation_id sid) {
+void Site::renew(double e, mutation_id sid, int gen) {
   if (derived_alleles_count != 0 || !reusable) 
     throw SimError("site cannot be reused");
   effect = e;
   reusable = false;
   id = sid;
+  generation_created = gen;
+}
+
+/* set all the genotypes back to ancestral derived */
+void Site::reset(void) {
+  genotypes = homozygote_ancestral;
+  derived_alleles_count = 0;
 }
 
 /* print out information related to this site */

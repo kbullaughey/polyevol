@@ -16,7 +16,7 @@ parse.trajectories.from.frequency.data <- function(x) {
   # extract the generation from each line
   gen <- as.numeric(sub("^.*gen: ([0-9]*) .*$", "\\1", freq.lines))
   # split the lines on spaces, now a list of character vectors of the form "id:freq"
-  x <- strsplit(sub("^.*freqs: ", "", freq.lines), split=" ")
+  x <- strsplit(sub("^.*freqs: *", "", freq.lines), split=" ")
   # extract out the IDs and frequencies
   locus.ids <- lapply(x, function(z) as.numeric(sapply(strsplit(z, split=":"), function(y) y[1])))
   locus.freqs <- lapply(x, function(z) as.numeric(sapply(strsplit(z, split=":"), function(y) y[2])))
@@ -63,7 +63,7 @@ load.simoutput <- function(file.name) {
   names(phenodata) <- c("gen", "mean", "var")
 
   # extract the effect sizes from the 'site' output lines
-  site.lines <- file.lines[grep("^site:", file.lines)]
+  site.lines <- file.lines[grep("site: id:", file.lines)]
   site.id <- sub("^.* id: ([0-9]+) .*$", "\\1", site.lines)
   site.effect <- as.numeric(sub("^.*effect: (-?[0-9]).*$", "\\1", site.lines, perl=TRUE))
   names(site.effect) <- site.id

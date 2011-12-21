@@ -22,6 +22,7 @@ bool Population::initialized = false;
 int Population::popsize;
 Model Population::sites_model;
 vector<Population*> Population::pop_views;
+int Population::generation = 0;
 
 /* Initialize the class variables of Population */
 void Population::initialize(int N, Model m) {
@@ -126,16 +127,16 @@ Population::create_site(double e) {
     lost.pop();
     /* go through each population view and renew use the old site for this new mutation */
     for (vector<Population*>::iterator it = pop_views.begin(); it != pop_views.end(); it++)
-      (*it)->sites[loc].renew(e, id);   
+      (*it)->sites[loc].renew(e, id, generation);   
   } else {
     loc = num_loci++;
     /* go through each population view and create a new site object */
     for (vector<Population*>::iterator it = pop_views.begin(); it != pop_views.end(); it++) 
-      (*it)->sites.push_back(Site(popsize, e, id));
+      (*it)->sites.push_back(Site(popsize, e, id, generation));
   }
 
   /* dump the site from one of the pop views so we have a record of its creation */
-  cout << pop_views[0]->sites[loc] << endl;
+  cout << "gen: " << generation << " " << pop_views[0]->sites[loc] << endl;
   return loc;
 }
 
@@ -151,6 +152,27 @@ Population::purge_lost(void) {
         (*pit)->sites[loc].reusable = true; /* make the site reusable */
       /* record this site as having been lost */
       lost.push(loc);
+      cout << "gen: " << generation << " absorption loss site: " << sites[loc].id 
+        << " sojourn: " << generation-sites[loc].generation_created 
+        << " effect: " << sites[loc].effect << endl;
+    } else if (sites[loc].derived_alleles_count == 2*popsize && !sites[loc].reusable) {
+      /* dealing with a fixed site is more complicated because we need to remove
+       * it from all genomes and adjust the baseline to reflect this sites now 
+       * perminant effect */
+      for (vector<Population*>::iterator pit = pop_views.begin(); pit != pop_views.end(); pit++) {
+        for (vector<Genome*>::iterator git = (*pit)->genomes.begin(); 
+            git != (*pit)->genomes.end(); git++) {
+          /* search the genome for this site and remove it */
+          (*git)->purge_site(loc);
+        }
+        (*pit)->sites[loc].reset(); /* sets all genotypes back to homozygous ancestral */
+        (*pit)->sites[loc].reusable = true; /* make the site reusable */
+      }
+      /* adjust the genomic baseline to reflect the fixation */
+      Genome::baseline += 2*sites[loc].effect;
+      cout << "gen: " << generation << " absorption fixation site: " << sites[loc].id 
+        << " sojourn: " << generation-sites[loc].generation_created 
+        << " effect: " << sites[loc].effect << endl;
     }
   }
 }
@@ -162,8 +184,11 @@ Population::print_frequency_summary(void) {
   cout << "freqs:";
   for (mutation_loc loc=0; loc < sites.size(); loc++) {
     /* print only sites that haven't been recorded as lost */
-    if (!sites[loc].reusable)
-      cout << " " << sites[loc].id << ":" << sites[loc].frequency();
+    if (!sites[loc].reusable) {
+      double f = sites[loc].frequency();
+      if (f < 1.0) 
+        cout << " " << sites[loc].id << ":" << f;
+    }
   }
   cout << endl;
   return;
@@ -197,17 +222,5 @@ operator<<(ostream &s, const Population &p) {
   s << "there are " << p.pop_views.size() << " views" << endl;
   return s;
 }
-
-/* this is used in the infinite sites model to remember a site is fixed, and 
- * that way we don't need to keep track of it. This can be done by adjusting 
- * the population baseline phenotype. The judgement is made on one population
- * but the sites tables need to be updated for each population view */
-// TODO: finish this. Don't forget to remove the sites from the Genomes
-//void Population::assimilate_fixed(void) {
-//  /* find any sites that have fixed */
-//  for (mutation_loc i=0 i < sites.size(); i++) {
-//  }
-//}
-
 
 /* END */

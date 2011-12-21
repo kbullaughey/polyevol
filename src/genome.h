@@ -32,6 +32,7 @@ public:
   double update_fitness(void);
   void clear(void);
   void mutate_genome();
+  void purge_site(mutation_loc loc);
   virtual void mutate_site(mutation_loc loc, double direction) = 0;
   virtual void mutate_site(void) = 0;
 

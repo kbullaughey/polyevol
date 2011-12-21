@@ -8,12 +8,13 @@ typedef unsigned int mutation_id;
 
 class Site {
 public:
-  Site(int N, double e, mutation_id sid);
+  Site(int N, double e, mutation_id sid, int gen);
   ~Site() { }
   void set_genotype(int i, genotype g);
   double frequency(void);
   int count(void);
-  void renew(double e, mutation_id sid);
+  void renew(double e, mutation_id sid, int gen);
+  void reset(void);
 
   /* operators */
   friend std::ostream& operator<<(std::ostream &o, Site &s);
@@ -23,8 +24,9 @@ public:
   /* effect size of a derived allele at this site */
   double effect;
 
-  /* this should only be read publically, not altered */
+  /* these should only be read publically, not altered */
   int derived_alleles_count;
+  int generation_created;
   
   /* used to mark a site as free for reuse */
   bool reusable;

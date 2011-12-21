@@ -29,6 +29,7 @@ public:
 
   /* this is the length of the sites vectors, which are all the same length */
   static int num_loci;
+  static int generation;
 
   /* I keep records in two ways: A list of genomes, each of which contains 
    * the loci that have derived alleles in that individual, and a list of
