@@ -119,6 +119,10 @@ main(int argc, char **argv) { try {
         cout << "end burnin" << endl;
       if (ar.burnin <= 0) {
         Population::generation++;
+        if (Population::generation == 0) {
+          cout << "burnin mutations: " << Genome::mutation_count << endl;
+          Genome::mutation_count = 0;
+        }
       } else {
         ar.burnin--;
       }
@@ -131,6 +135,7 @@ main(int argc, char **argv) { try {
   /* print the final state */
   cout << "gen: " << Population::generation << " "; pops[parent_pop].print_frequency_summary();
   cout << "gen: " << Population::generation << " "; pops[parent_pop].print_phenotype_summary();
+  cout << "mutations: " << Genome::mutation_count << endl;
 
 /* catch any errors that were thrown anywhere inside this block */
 } catch (SimUsageError e) {

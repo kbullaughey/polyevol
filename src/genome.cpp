@@ -21,6 +21,7 @@ double Genome::environmental_noise;
 double Genome::optimum;
 double Genome::sig;
 double Genome::baseline;
+int Genome::mutation_count;
 
 /* A new genome is created with no mutant alleles */
 Genome::Genome(Population *p, int indiv) { 
@@ -38,6 +39,7 @@ Genome::initialize(double u, double sg, double opt, double env) {
   optimum = opt;
   environmental_noise = env;
   baseline = 0;
+  mutation_count = 0;
   return;
 }
 
@@ -133,9 +135,10 @@ operator<<(ostream &s, Genome &g) {
 void 
 Genome::mutate_genome(void) {
   /* draw a poisson number of mutations */
-  int mutation_count = poidev(2.0*mu);
-  for (int i = 0; i < mutation_count; i++) 
+  int num_muts = poidev(2.0*mu);
+  for (int i = 0; i < num_muts; i++) 
     mutate_site();
+  mutation_count += num_muts;
   return;
 }
 

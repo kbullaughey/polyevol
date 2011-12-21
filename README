@@ -1,6 +1,1 @@
-To build the executables from source do the following:
-
-cd src
-make
-
-The main program for running simulations is 'quant'
+See the README in the src directory
