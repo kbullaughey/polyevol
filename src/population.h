@@ -13,8 +13,8 @@ public:
   Population(void);
   ~Population() { }
   void setup_initial_genotypes(std::valarray<int> &hets, std::valarray<int> &homs);
-  void print_frequency_summary(void);
-  void print_phenotype_summary(void);
+  void stat_frequency_summary(void);
+  void stat_phenotype_summary(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
   void purge_lost(void);
