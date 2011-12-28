@@ -17,6 +17,7 @@
 #include "genome.h"
 #include "population.h"
 #include "common.h"
+#include "statistic.h"
 
 #define OFFSPRING_POP (1-parent_pop)
 
@@ -35,6 +36,9 @@ main(int argc, char **argv) { try {
     usage();
     return 0;
   }
+
+  /* set up the default statistics */
+  Statistic::initialize_defaults(); 
 
   /* read in the command line arguments and print them out */
   Args ar(argc, argv);
@@ -103,8 +107,8 @@ main(int argc, char **argv) { try {
     while (Population::generation < ar.times[epoch]) {
       /* only print output if we've discarded the burnin */
       if (ar.burnin <= 0) {
-        cout << "gen: " << Population::generation << " "; pops[parent_pop].print_frequency_summary();
-        cout << "gen: " << Population::generation << " "; pops[parent_pop].print_phenotype_summary();
+        pops[parent_pop].stat_frequency_summary();
+        pops[parent_pop].stat_phenotype_summary();
       } 
 
       /* advance the population simulation one generation */
@@ -115,12 +119,13 @@ main(int argc, char **argv) { try {
         pops[OFFSPRING_POP].purge_lost();
     
       /* generations start counting after the burnin is over */
-      if (ar.burnin == 0)
+      if (ar.burnin == 0 && Population::generation == 0 && Statistic::is_activated("burnin"))
         cout << "end burnin" << endl;
       if (ar.burnin <= 0) {
         Population::generation++;
         if (Population::generation == 0) {
-          cout << "burnin mutations: " << Genome::mutation_count << endl;
+          if (Statistic::is_activated("burnin"))
+            cout << "burnin mutations: " << Genome::mutation_count << endl;
           Genome::mutation_count = 0;
         }
       } else {
@@ -133,9 +138,10 @@ main(int argc, char **argv) { try {
   } /* end of main loop */
 
   /* print the final state */
-  cout << "gen: " << Population::generation << " "; pops[parent_pop].print_frequency_summary();
-  cout << "gen: " << Population::generation << " "; pops[parent_pop].print_phenotype_summary();
-  cout << "mutations: " << Genome::mutation_count << endl;
+  pops[parent_pop].stat_frequency_summary();
+  pops[parent_pop].stat_phenotype_summary();
+  if (Statistic::is_activated("mutation")) 
+    cout << "mutations: " << Genome::mutation_count << endl;
 
 /* catch any errors that were thrown anywhere inside this block */
 } catch (SimUsageError e) {
@@ -172,6 +178,16 @@ usage(void) {
     << "  --freqs file | even   method for initializing frequencies\n"
     << "      file: read in frequencies from a file\n"
     << "      even: evenly spaced. ith freq is i/(1+n) where n is the number of loci\n"
+    << "Statistics control:\n"
+    << "  --enable-stat=<str>   enable a statistic\n"
+    << "  --disable-stat=<str>  disable a statistic\n"
+    << "  --disable-all-stats   turn off all statistics (must precede enable options)\n"
+    << "      Available statistics:\n"
+    << "        frequencies     print allele IDs and frequencies (on)\n"
+    << "        phenotype       mean phenotype and variance (on)\n"
+    << "        mutation        ID and generation for each new mutation\n"
+    << "        sojourn         sojourn time in gen for infinite sites model\n"
+    << "        burnin          notices about the burnin period\n"
     << "\n";
   return;
 }

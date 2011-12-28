@@ -174,10 +174,14 @@ plot.freqs.aux <- function(run, color.id, resolution=500, freq.tr="pass.thru", a
 
   # plot the phenotype
   y <- run$pheno$mean
+  y.sd <- sqrt(run$pheno$var)
   g <- run$pheno$gen
-  pushViewport(viewport(y=1, just=c(0.5,1), height=0.8, xscale=c(0,ngen), yscale=range(c(y, run$par$opts))))
+  pushViewport(viewport(y=1, just=c(0.5,1), height=0.8, xscale=c(0,ngen), 
+      yscale=range(c(y-y.sd, y+y.sd, run$par$opts))))
     idx <- reduce.index(y, len=resolution)
-    grid.lines(g[idx], y[idx], gp=gpar(col=rgb(0,0,0,0.3), lwd=3), default.units="native") 
+    grid.polygon(x=c(g[idx], rev(g[idx])), y=c((y-y.sd)[idx], rev((y+y.sd)[idx])), 
+      gp=gpar(fill=rgb(0,0,0,0.2), col=rgb(0,0,0,0.2)), default.units="native")
+    grid.lines(g[idx], y[idx], gp=gpar(lwd=1, col="gray30"), default.units="native") 
     grid.yaxis(gp=gpar(cex=0.75), main=FALSE)
     grid.text("Phenotype", y=0.5, x=1.1, rot=90, gp=gpar(cex=0.9))
     grid.rect()

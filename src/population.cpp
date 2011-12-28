@@ -7,6 +7,7 @@
 #include "genome.h"
 #include "error_handling.h"
 #include "sim_rand.h"
+#include "statistic.h"
 
 using std::valarray;
 using std::cout;
@@ -136,7 +137,8 @@ Population::create_site(double e) {
   }
 
   /* dump the site from one of the pop views so we have a record of its creation */
-  cout << "gen: " << generation << " " << pop_views[0]->sites[loc] << endl;
+  if (Statistic::is_activated("mutation"))
+    cout << "gen: " << generation << " " << pop_views[0]->sites[loc] << endl;
   return loc;
 }
 
@@ -152,9 +154,11 @@ Population::purge_lost(void) {
         (*pit)->sites[loc].reusable = true; /* make the site reusable */
       /* record this site as having been lost */
       lost.push(loc);
-      cout << "gen: " << generation << " absorption loss site: " << sites[loc].id 
-        << " sojourn: " << generation-sites[loc].generation_created 
-        << " effect: " << sites[loc].effect << endl;
+      if (Statistic::is_activated("sojourn")) {
+        cout << "gen: " << generation << " absorption loss site: " << sites[loc].id 
+          << " sojourn: " << generation-sites[loc].generation_created 
+          << " effect: " << sites[loc].effect << endl;
+      }
     } else if (sites[loc].derived_alleles_count == 2*popsize && !sites[loc].reusable) {
       /* dealing with a fixed site is more complicated because we need to remove
        * it from all genomes and adjust the baseline to reflect this sites now 
@@ -170,9 +174,11 @@ Population::purge_lost(void) {
       }
       /* adjust the genomic baseline to reflect the fixation */
       Genome::baseline += 2*sites[loc].effect;
-      cout << "gen: " << generation << " absorption fixation site: " << sites[loc].id 
-        << " sojourn: " << generation-sites[loc].generation_created 
-        << " effect: " << sites[loc].effect << endl;
+      if (Statistic::is_activated("sojourn")) {
+        cout << "gen: " << generation << " absorption fixation site: " << sites[loc].id 
+          << " sojourn: " << generation-sites[loc].generation_created 
+          << " effect: " << sites[loc].effect << endl;
+      }
     }
   }
 }
@@ -180,8 +186,9 @@ Population::purge_lost(void) {
 
 /* print out the frequencies of all the sites that have mutated so far */
 void
-Population::print_frequency_summary(void) {
-  cout << "freqs:";
+Population::stat_frequency_summary(void) {
+  if (!Statistic::is_activated("frequencies")) return;
+  cout << "gen: " << generation << " freqs:";
   for (mutation_loc loc=0; loc < sites.size(); loc++) {
     /* print only sites that haven't been recorded as lost */
     if (!sites[loc].reusable) {
@@ -196,16 +203,17 @@ Population::print_frequency_summary(void) {
 
 /* print out the phenotype mean and variance */
 void
-Population::print_phenotype_summary(void) {
-  double sum, sumsq, p;
+Population::stat_phenotype_summary(void) {
+  if (!Statistic::is_activated("phenotype")) return;
 
+  double sum, sumsq, p;
   sum = sumsq = 0.0;
   for (int ind=0; ind < popsize; ind++) {
     p = genomes[ind]->phenotype;
     sum += p;
     sumsq += p*p;
   }
-  cout << "pheno: " << sum/popsize 
+  cout << "gen: " << generation << " pheno: " << sum/popsize 
     << " " << sumsq/popsize - (sum/popsize)*(sum/popsize) << endl;
   return;
 }

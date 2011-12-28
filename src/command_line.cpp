@@ -1,6 +1,7 @@
 #include "command_line.h"
 #include "error_handling.h"
 #include "common.h"
+#include "statistic.h"
 
 #include <getopt.h>
 #include <iostream>
@@ -21,6 +22,9 @@
 #define TIMES         306
 #define EFFECT_PROBS  307
 #define FREQS         308
+#define STATON        309
+#define STATOFF       310
+#define STATALLOFF    311
 
 using std::cerr;
 using std::cin;
@@ -113,6 +117,9 @@ Args::Args(int argc, char *argv[]) {
       {"eprobs", required_argument, 0, EFFECT_PROBS},
       {"freqs", required_argument, 0, FREQS},
       {"model", required_argument, 0, 'm'},
+      {"enable-stat", required_argument, 0, STATON},
+      {"disable-stat", required_argument, 0, STATOFF},
+      {"disable-all-stats", no_argument, NULL, STATALLOFF},
       {0, 0, 0, 0}
     };
     /* getopt_long stores the option index here. */
@@ -234,6 +241,22 @@ Args::Args(int argc, char *argv[]) {
           throw SimUsageError("must specify effect probabilities");
         fix_negatives(optarg);
         valdouble_from_string(optarg, effect_probabilities);
+        break;
+
+      case STATON:
+        if (!has_option(optarg))
+          throw SimUsageError("must specify statistic to enable");
+        Statistic::activate(optarg);
+        break;
+
+      case STATOFF:
+        if (!has_option(optarg))
+          throw SimUsageError("must specify statistic to disable");
+        Statistic::deactivate(optarg);
+        break;
+
+      case STATALLOFF:
+        Statistic::deactivate_all();
         break;
 
       default:
