@@ -55,6 +55,14 @@ parse.to.matrix <- function(x, sep=" ", transform=as.numeric) {
   matrix(unlist(spl), ncol=length(spl[[1]]), byrow=TRUE)
 }
 
+parse.params <- function(file.lines) {
+  params <- sub("^params: ", "", file.lines[grep("^params: ", file.lines)])
+  stopifnot(length(params) == 1)
+  params <- sub(",$", "", strsplit(params, split=" ")[[1]])
+  # make a list out of the parameters, which are formatted as R assignments
+  eval(parse(text=paste("list(", paste(params, collapse=","), ")")))
+}
+
 # load an output file from the simulation into a friendly package
 load.simoutput <- function(file.name) {
   file.lines <- scan(file=file.name, what="", sep="\n")
@@ -63,11 +71,7 @@ load.simoutput <- function(file.name) {
   cmd <- sub("^cmd: ", "", file.lines[grep("^cmd: ", file.lines)])
 
   # use the params line to get all configuration
-  params <- sub("^params: ", "", file.lines[grep("^params: ", file.lines)])
-  stopifnot(length(params) == 1)
-  params <- sub(",$", "", strsplit(params, split=" ")[[1]])
-  # make a list out of the parameters, which are formatted as R assignments
-  params <- eval(parse(text=paste("list(", paste(params, collapse=","), ")")))
+  params <- parse.params(file.lines)
 
   # extract the data from the file in subsets based on line prefixes
   traj <- parse.trajectories.from.frequency.data(file.lines)
