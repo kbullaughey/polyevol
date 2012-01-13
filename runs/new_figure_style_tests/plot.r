@@ -1,7 +1,10 @@
+source('../../src/r/evolveq.R')
+
 sets <- c("balancing-infinite", "balancing-finite", "no_balancing-infinite", "no_balancing-finite")
-sets <- c("no_balancing-infinite", "no_balancing-finite")
+#sets <- c("no_balancing-infinite", "no_balancing-finite")
 
 set.runs <- lapply(sets, function(s) {
+  cat("processing set", s, "\n")
   # load the runs
   pip <- pipe(paste("ls ", s, ".*.out", sep=""), "r")
   files <- scan(file=pip, what="", sep="\n")
