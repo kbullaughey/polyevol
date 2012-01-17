@@ -109,6 +109,7 @@ main(int argc, char **argv) { try {
       if (ar.burnin <= 0) {
         pops[parent_pop].stat_frequency_summary();
         pops[parent_pop].stat_phenotype_summary();
+        pops[parent_pop].stat_increment_visits();
       } 
 
       /* advance the population simulation one generation */
@@ -140,6 +141,7 @@ main(int argc, char **argv) { try {
   /* print the final state */
   pops[parent_pop].stat_frequency_summary();
   pops[parent_pop].stat_phenotype_summary();
+  Population::stat_print_visits();
   if (Statistic::is_activated("mutation")) 
     cout << "mutations: " << Genome::mutation_count << endl;
 
@@ -188,6 +190,7 @@ usage(void) {
     << "        mutation        ID and generation for each new mutation\n"
     << "        sojourn         sojourn time in gen for infinite sites model\n"
     << "        burnin          notices about the burnin period\n"
+    << "        visits          report (final) number of visits to each allele count\n"
     << "\n";
   return;
 }

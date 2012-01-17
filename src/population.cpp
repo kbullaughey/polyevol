@@ -24,12 +24,17 @@ int Population::popsize;
 Model Population::sites_model;
 vector<Population*> Population::pop_views;
 int Population::generation = 0;
+vector<int> Population::visits;
 
 /* Initialize the class variables of Population */
 void Population::initialize(int N, Model m) {
+  if (initialized) throw SimError("Population class already initialized");
   popsize = N;
   sites_model = m;
   initialized = true;
+  if (Statistic::is_activated("visits")) {
+    visits = vector<int>(2*N-1, 0);
+  }
 }
 
 /* Create a population */
@@ -183,6 +188,25 @@ Population::purge_lost(void) {
   }
 }
 
+void
+Population::stat_increment_visits(void) {
+  if (!Statistic::is_activated("visits")) return;
+  for (mutation_loc loc=0; loc < sites.size(); loc++) {
+    if (!sites[loc].reusable) 
+      visits[sites[loc].derived_alleles_count-1]++;
+  }
+  return;
+}
+
+void
+Population::stat_print_visits(void) {
+  if (!Statistic::is_activated("visits")) return;
+  cout << "visits:";
+  for (int i=0; i<(int)visits.size(); i++)
+    cout << " " << visits[i];
+  cout << endl;
+  return;
+}
 
 /* print out the frequencies of all the sites that have mutated so far */
 void

@@ -15,6 +15,8 @@ public:
   void setup_initial_genotypes(std::valarray<int> &hets, std::valarray<int> &homs);
   void stat_frequency_summary(void);
   void stat_phenotype_summary(void);
+  void stat_increment_visits(void);
+  static void stat_print_visits(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
   void purge_lost(void);
@@ -63,6 +65,9 @@ private:
   static bool initialized;
   static int popsize;
   static Model sites_model;
+
+  /* use by statistics */
+  static std::vector<int> visits;
 };
 
 #endif /* __POPULATION_H__ */

@@ -17,6 +17,7 @@ void Statistic::initialize_defaults(void) {
   directory[string("burnin")] = true;
   directory[string("sojourn")] = true;
   directory[string("mutation")] = true;
+  directory[string("visits")] = false;
 }
 
 /* turn off all the statistics */
