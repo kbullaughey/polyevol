@@ -167,7 +167,7 @@ plot.freqs.aux <- function(run, color.id, resolution=500, freq.tr="pass.thru", a
         f <- run$freq[[i]]$freq
       }
       f <- do.call(freq.tr, list(f, run$par$popsize))
-      grid.lines(g, f, gp=gpar(col=color.id[[id]]), default.units="native") 
+      grid.lines(g, f, gp=gpar(col=color.id[i]), default.units="native") 
     })
     grid.xaxis(gp=gpar(cex=0.7))
     y.at <- do.call(freq.tr, list(at, run$par$popsize))
