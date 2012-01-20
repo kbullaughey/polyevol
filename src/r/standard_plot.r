@@ -1,4 +1,4 @@
-#!/usr/bin/Rscript
+#!/usr/bin/Rscript --verbose
 
 # load arguments
 the.args <- commandArgs()
