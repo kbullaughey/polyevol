@@ -37,13 +37,14 @@ sets.data <- lapply(sets, function(set) {
 
   # compute overall visits distribition
   visits <- apply(visit.data, 1, sum)
-  visits.distr <- visits / sum(visits)
+  visits.distr <- visits / (mu * 2*popsize * runs.params[[1]]$times[1] * length(files))
   visits.distr.log <- log10(visits.distr)
   min.nonzero.density.log <- min(visits.distr.log[visits.distr.log > -Inf])
   max.density.log <- max(visits.distr.log)
   
   # read in the sojourn tables
-  list(distr=visits.distr.log, min.density=min.nonzero.density.log, max.density=max.density.log, mu=mu, N=popsize)
+  list(distr=visits.distr.log, min.density=min.nonzero.density.log, max.density=max.density.log, 
+    mu=mu, N=popsize, params=runs.params)
 })
 
 N <- sapply(sets.data, function(x) x$N)
@@ -85,7 +86,7 @@ pushViewport(viewport(x=0.90, y=0.99, just=c(1,1), height=0.33, width=0.1))
   mutation.o <- order(as.numeric(mutation.rates * 2*N))
   legend.y <- seq(0, 0.75, length.out=length(sets))
   grid.points(x=rep(0.2, length(sets)), y=legend.y, size=unit(0.4, "char"), pch=21, gp=gpar(col=(1:length(sets))[mutation.o]))
-  grid.text(mutation.rates[mutation.o], x=0.3, just=c(0,0.5), y=legend.y, gp=gpar(cex=0.8, fontfamily="mono"))
+  grid.text(2*N*mutation.rates[mutation.o], x=0.3, just=c(0,0.5), y=legend.y, gp=gpar(cex=0.8, fontfamily="mono"))
   grid.text("mutations entering", x=0.5, y=1, just=c(0.5,1), gp=gpar(cex=0.9))
   grid.text("population per gen.", x=0.5, y=0.9, just=c(0.5,1), gp=gpar(cex=0.9))
 popViewport()
