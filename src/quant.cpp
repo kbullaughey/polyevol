@@ -110,6 +110,7 @@ main(int argc, char **argv) { try {
         pops[parent_pop].stat_frequency_summary();
         pops[parent_pop].stat_phenotype_summary();
         pops[parent_pop].stat_increment_visits();
+        pops[parent_pop].stat_fixations();
       } 
 
       /* advance the population simulation one generation */
@@ -191,6 +192,7 @@ usage(void) {
     << "        sojourn         sojourn time in gen for infinite sites model\n"
     << "        burnin          notices about the burnin period\n"
     << "        visits          report (final) number of visits to each allele count\n"
+    << "        fixations       number of fixations of each effect size\n"
     << "\n";
   return;
 }
