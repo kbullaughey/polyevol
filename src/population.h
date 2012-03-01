@@ -4,6 +4,7 @@
 #include <valarray>
 #include <ostream>
 #include <vector>
+#include <map>
 
 #include "common.h"
 #include "genome.h"
@@ -16,6 +17,7 @@ public:
   void stat_frequency_summary(void);
   void stat_phenotype_summary(void);
   void stat_increment_visits(void);
+  void stat_fixations(void);
   static void stat_print_visits(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
@@ -68,6 +70,7 @@ private:
 
   /* use by statistics */
   static std::vector<int> visits;
+  static std::map<double,int> fixations;
 };
 
 #endif /* __POPULATION_H__ */
