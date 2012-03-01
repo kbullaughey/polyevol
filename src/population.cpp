@@ -15,6 +15,7 @@ using std::endl;
 using std::ostream;
 using std::vector;
 using std::queue;
+using std::map;
 
 /* storage for class variables */
 int Population::num_loci = 0;
@@ -25,6 +26,7 @@ Model Population::sites_model;
 vector<Population*> Population::pop_views;
 int Population::generation = 0;
 vector<int> Population::visits;
+map<double,int> Population::fixations;
 
 /* Initialize the class variables of Population */
 void Population::initialize(int N, Model m) {
@@ -179,6 +181,7 @@ Population::purge_lost(void) {
       }
       /* adjust the genomic baseline to reflect the fixation */
       Genome::baseline += 2*sites[loc].effect;
+      fixations[sites[loc].effect]++;
       if (Statistic::is_activated("sojourn")) {
         cout << "gen: " << generation << " absorption fixation site: " << sites[loc].id 
           << " sojourn: " << generation-sites[loc].generation_created 
@@ -204,6 +207,17 @@ Population::stat_print_visits(void) {
   cout << "visits:";
   for (int i=0; i<(int)visits.size(); i++)
     cout << " " << visits[i];
+  cout << endl;
+  return;
+}
+
+void
+Population::stat_fixations(void) {
+  if (!Statistic::is_activated("fixations")) return;
+  cout << "gen: " << generation << " fixations:";
+  for (map<double,int>::iterator i=fixations.begin(); i!=fixations.end(); i++) {
+    cout << " " << i->first << "," << i->second;
+  }
   cout << endl;
   return;
 }
