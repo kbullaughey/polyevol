@@ -18,6 +18,7 @@ public:
   void stat_phenotype_summary(void);
   void stat_increment_visits(void);
   void stat_fixations(void);
+  void stat_segsites(void);
   static void stat_print_visits(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
