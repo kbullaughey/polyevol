@@ -18,7 +18,7 @@ if [ -z $JOB_ID ] ; then
 fi
 
 file_suffix=`echo "$params" | tr '= ' '_-' | sed 's/--/-/g' | sed 's/^-//'`
-basedir="out/$analysis/$file_suffix"
+basedir="out/$analysis"
 outfile="$basedir/$analysis-$file_suffix.$JOB_ID.out.gz"
 
 if [ ! -d $basedir ] ; then
