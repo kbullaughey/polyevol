@@ -17,7 +17,7 @@ file_suffix=`echo "$params" | tr '= ' '_-' | sed 's/--/-/g' | sed 's/^-//'`
 basedir="out/$analysis/$file_suffix"
 outfile="$basedir/$analysis-$file_suffix.$JOB_ID.out.gz"
 
-if [ -z $JOB_ID ] ; then
+if [ ! -z $JOB_ID ] ; then
   JOB_ID=$seed
 fi
 
@@ -25,7 +25,7 @@ if [ ! -d $basedir ] ; then
   mkdir -p $basedir
 fi
 
-$HOME/bin/quant -m infinite --freqs=even -s 0.1 -N 1000 --opts=0 --loci=0 --burnin=10000 \
-    --times=10000 $params | gzip > $outfile
+$HOME/bin/quant -m infinite --freqs=even -s 0.1 -N 1000 --opts=0 --loci=0 --burnin=10000 --seed=$seed \
+    --times=4000 $params | gzip > $outfile
 
 # END
