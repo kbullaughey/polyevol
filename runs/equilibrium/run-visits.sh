@@ -10,7 +10,7 @@ if [ "x" == "x$1" ] ; then
   exit 1
 fi
 params=$*
-analysis="visits"
+analysis="visits-2012_01_31"
 
 seed=`$HOME/bin/rand.pl`
 file_suffix=`echo "$params" | tr '= ' '_-' | sed 's/--/-/g' | sed 's/^-//'`
@@ -21,7 +21,7 @@ if [ ! -d $basedir ] ; then
   mkdir -p $basedir
 fi
 
-$HOME/bin/quant -m infinite --freqs=even -s 0.1 -N 1000 --opts=0 --loci=0 --burnin=10000 \
+$HOME/bin/quant -m infinite --freqs=even -s 0.1 -N 1000 --opts=0 --loci=0 --burnin=10000 --seed=$seed \
     --times=1000000 --disable-all-stats --enable-stat=visits $params \
   | gzip > $outfile
 
