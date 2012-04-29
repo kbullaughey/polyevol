@@ -52,7 +52,8 @@ axis.ticks.lab <- format(axis.ticks)
 axis.ticks.lab[round(log10(axis.ticks)) != log10(axis.ticks)] <- NA
 
 # plot the sojourn distributions
-palette(c("gray30", "purple", "firebrick", "dodgerblue"))
+#palette(c("gray30", "purple", "firebrick", "dodgerblue"))
+palette(c("purple", "tan", "olivedrab", "gray30"))
 scale <- 1.3
 pdf(file="sojourn_distributions.pdf", height=4*scale, width=7*scale)
 pushViewport(viewport(x=0.97, y=0.97, just=c(1,1), height=0.8, width=0.8, 
@@ -75,7 +76,7 @@ pushViewport(viewport(x=0.97, y=0.97, just=c(1,1), height=0.2, width=0.2))
   mutation.o <- order(as.numeric(mutation.rates))
   legend.y <- seq(0, 0.7, length.out=length(sets))
   grid.points(x=rep(0, length(sets)), y=legend.y, size=unit(0.4, "char"), pch=21, gp=gpar(col=(1:length(sets))[mutation.o]))
-  grid.text(mutation.rates[mutation.o], x=0.1, just=c(0,0.5), y=legend.y, gp=gpar(cex=0.8, fontfamily="mono"))
+  grid.text(2000*as.numeric(mutation.rates)[mutation.o], x=0.1, just=c(0,0.5), y=legend.y, gp=gpar(cex=0.8, fontfamily="mono"))
   grid.text("mutation rate", x=0, y=1, just=c(0,0.5))
 popViewport()
 dev.off()
