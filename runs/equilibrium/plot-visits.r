@@ -1,7 +1,8 @@
 library(grid)
 source('../../src/r/evolveq.R')
 
-pip <- pipe("ls out/visits", "r")
+run.name <- 'visits-2012_01_31'
+pip <- pipe(paste("ls out/", run.name, sep=""), "r")
 sets <- scan(file=pip, what="", sep="\n")
 close(pip)
 
@@ -10,7 +11,7 @@ mutation.rates <- as.numeric(sub(".*u-", "", sapply(strsplit(sets, split="--"),
 
 sets.data <- lapply(sets, function(set) {
   cat("processing set", set, "\n")
-  set.dir <- paste("out/visits/", set, sep="")
+  set.dir <- paste("out/", run.name, "/", set, sep="")
   
   # get file listings
   # TODO: change find to lfs find
@@ -65,15 +66,19 @@ axis.ticks.lab <- format(axis.ticks)
 axis.ticks.lab[floor(log10(axis.ticks)) != log10(axis.ticks)] <- NA
 
 # plot the sojourn distributions
-palette(c("gray30", "purple", "firebrick", "dodgerblue", "black", "orange", "darkblue", "violet", "olivedrab"))
+palette(rep(c("gray30", "purple", "firebrick", "dodgerblue", "tan", "orange", "darkblue", "violet", "olivedrab"), 10))
 scale <- 1.3
-pdf(file="visits_distributions.pdf", height=4*scale, width=7*scale)
+pdf(file=paste("visits_distributions-", run.name, ".pdf", sep=""), height=4*scale, width=7*scale)
 pushViewport(viewport(x=0.97, y=0.97, just=c(1,1), height=0.8, width=0.8, 
     xscale=c(0,2*N), yscale=range(pretty(y.scale))))
+  derived.allele.counts <- 1:(2*N-1)
   trash <- lapply(1:length(sets.data), function(i) {
-    grid.lines(x=1:(2*N-1), y=sets.data[[i]]$distr, 
+    grid.lines(x=derived.allele.counts, y=sets.data[[i]]$distr, 
       default.units="native", gp=gpar(col=i, lwd=1.5))
   })
+  neutral.expectation <- 2/derived.allele.counts
+  neutral.expectation <- neutral.expectation / sum(neutral.expectation) * log(2*N)
+  grid.lines(x=1:(2*N-1), y=log10(neutral.expectation), default.units="native", gp=gpar(col="black", lwd=2, lty=2))
   grid.xaxis(gp=gpar(cex=0.8))
   grid.yaxis(at=log10(axis.ticks), label=FALSE, gp=gpar(cex=0.8))
   grid.text(axis.ticks.lab[axis.ticks.lab!=""], y=log10(axis.ticks)[axis.ticks.lab!=""], 
@@ -82,7 +87,7 @@ pushViewport(viewport(x=0.97, y=0.97, just=c(1,1), height=0.8, width=0.8,
   grid.text("density", y=0.5, x=-0.15, rot=90, gp=gpar(cex=1.0))
 popViewport()
 # plot a legend
-pushViewport(viewport(x=0.90, y=0.99, just=c(1,1), height=0.33, width=0.1))
+pushViewport(viewport(x=0.90, y=0.99, just=c(1,1), height=0.45, width=0.1))
   mutation.o <- order(as.numeric(mutation.rates * 2*N))
   legend.y <- seq(0, 0.75, length.out=length(sets))
   grid.points(x=rep(0.2, length(sets)), y=legend.y, size=unit(0.4, "char"), pch=21, gp=gpar(col=(1:length(sets))[mutation.o]))
