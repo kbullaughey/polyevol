@@ -19,6 +19,7 @@ void Statistic::initialize_defaults(void) {
   directory[string("mutation")] = true;
   directory[string("visits")] = false;
   directory[string("fixations")] = false;
+  directory[string("segsites")] = false;
 }
 
 /* turn off all the statistics */
