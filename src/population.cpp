@@ -239,6 +239,23 @@ Population::stat_frequency_summary(void) {
   return;
 }
 
+/* print out the number of segregating sites for each effect size */
+void
+Population::stat_segsites(void) {
+  if (!Statistic::is_activated("segsites")) return;
+  cout << "gen: " << generation << " segsites:";
+  map<double,int> counts;
+  for (mutation_loc loc=0; loc < sites.size(); loc++) {
+    /* record only sites that haven't been lost */
+    if (!sites[loc].reusable) counts[sites[loc].effect]++;
+  }
+  for (map<double,int>::iterator i=counts.begin(); i != counts.end(); i++) {
+    cout << " " << i->first << "," << i->second;
+  }
+  cout << endl;
+  return;
+}
+
 /* print out the phenotype mean and variance */
 void
 Population::stat_phenotype_summary(void) {
