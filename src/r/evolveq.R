@@ -1,4 +1,5 @@
 library(grid)
+library(gsl)
 
 # reduce a long vector to an evenly spaced subset
 reduce.index <- function(x, len=100) unique(floor(seq(1, length(x), length.out=len)))
@@ -190,6 +191,17 @@ plot.freqs.aux <- function(run, color.id, resolution=500, freq.tr="pass.thru", a
     grid.text("Phenotype", y=0.5, x=1.1, rot=90, gp=gpar(cex=0.9))
     grid.rect()
   popViewport()
+}
+
+# estimate N from the number of neutral segregating sites in the population
+N.S2N.est <- function(S, u) 0.5 * S / (u * lambert_W0(1.96895*S/u))
+# compute the expected number of segregating neutral sites in population
+S2N <- function(N, u) 2*N*u*(log(2*N)+0.6775)
+
+# Print the parameters included in m, in the command line format
+format.params <- function(m) {
+  p <- sapply(m, paste, collapse=",", sep="")
+  paste("--", names(m), "=", p, sep="", collapse=" ")
 }
 
 # END
