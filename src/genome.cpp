@@ -46,8 +46,13 @@ Genome::initialize(double u, double sg, double opt, double env) {
 /* clear a genome of all derived mutations */
 void
 Genome::clear(void) {
-  for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++) 
+  for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++) {
+/*    if (pop->sites[*it][individual] > homozygote_ancestral) {
+      std::cout << "clearing site " << pop->sites[*it].id << " in individual " << individual << std::endl;
+    }
+*/
     pop->sites[*it].set_genotype(individual, homozygote_ancestral);
+  }
   mutant_sites.clear();
 #ifdef EXTRA_CHECKS
   for (int s=0; s < (int)pop->sites.size(); s++) {
@@ -95,7 +100,15 @@ Genome::mate(Genome *mother, Genome *father) {
   for (vector<mutation_loc>::iterator it=mother->mutant_sites.begin(); it != mother->mutant_sites.end(); it++) {
     /* if it's not a heterozygote or if we happen to sample the derived allele,
      * then we start the genotype out as a heterozygote, i.e., it has 
-     * inherrited one derived allele from the mother. */
+     * inherrited one derived allele from the mother. 
+     * 
+     * HAPLOID: there are only two genotypes 0 and 1 (het). The 0 genotype doesn't
+     * store this site in the maternal genome (because there's no derived allele, 
+     * and thus the only time we get here, is if it's genotype 1 (het). So it's 
+     * not possible for the genotype to not be heterozygote, and thus the first 
+     * logical operatio nbelow is always false, and so we always inherit the maternal 
+     * derived allele with probability 1/2. Thus adding the haploid case doesn't 
+     * change this expression form the original diploid implementation. */
     if (mother->pop->sites[*it][mother->individual] != heterozygote || ran1() < 0.5) {
       pop->sites[*it].set_genotype(individual, heterozygote); /* set the genotype in the Site object */
       mutant_sites.push_back(*it); /* add this site to the list of ones with derived alleles */
@@ -104,17 +117,37 @@ Genome::mate(Genome *mother, Genome *father) {
 
   /* now go through the father's mutations */
   for (vector<mutation_loc>::iterator it=father->mutant_sites.begin(); it != father->mutant_sites.end(); it++) {
+    enum genotype child_genotype = homozygote_ancestral;
     /* see if the child already has one derived allele */
     if (pop->sites[*it][individual] > homozygote_ancestral) {
+      /* for the haploid case, if we already have a derived allele, we can't inherit another */
+      if (Site::ploidy_level == haploid) continue;
       /* if the father is not a heterozygote or we happen to sample the derived
        * allele, make the childe homozygote-derived */
       if (father->pop->sites[*it][father->individual] != heterozygote || ran1() < 0.5)
-        pop->sites[*it].set_genotype(individual, homozygote_derived); /* set the genotype in the Site object */
+        child_genotype = homozygote_derived;
     } else {
-      if (father->pop->sites[*it][father->individual] != heterozygote || ran1() < 0.5) {
-        pop->sites[*it].set_genotype(individual, heterozygote); /* set the genotype in the Site object */
-        mutant_sites.push_back(*it); /* add this site to the list of ones with derived alleles */
+      /* if the mother has a derived allele (equivalent to het in the diploid encoding), and 
+       * we didn't copy it, then we necessarily copy the father's allele (which must be 
+       * derived, otherwise we wouldn't be here, as we're iterating through the father's 
+       * derived alleles. If the mother does not have a derived allele, then we copy that 
+       * ancestral allele with probability 0.5 (in which case no derived allele needs to be 
+       * noted, or we copy the paternal one which is necessarily derived (again, because 
+       * we're here) */
+      if (Site::ploidy_level == haploid) {
+        if (mother->pop->sites[*it][mother->individual] == heterozygote && pop->sites[*it][individual] == homozygote_ancestral) {
+          child_genotype = heterozygote;
+        } else {
+          if (ran1() < 0.5) child_genotype = heterozygote;
+        }
+      } else {
+        if (father->pop->sites[*it][father->individual] != heterozygote || ran1() < 0.5)
+          child_genotype = heterozygote;
       }
+    }
+    if (child_genotype > homozygote_ancestral) {
+      pop->sites[*it].set_genotype(individual, child_genotype); /* set the genotype in the Site object */
+      mutant_sites.push_back(*it); /* add this site to the list of ones with derived alleles */
     }
   }
   
@@ -135,7 +168,12 @@ operator<<(ostream &s, Genome &g) {
 void 
 Genome::mutate_genome(void) {
   /* draw a poisson number of mutations */
-  int num_muts = poidev(2.0*mu);
+  int num_muts;
+  if (Site::ploidy_level == diploid) {
+    num_muts = poidev(2.0*mu);
+  } else {
+    num_muts = poidev(1.0*mu);
+  }
   for (int i = 0; i < num_muts; i++) 
     mutate_site();
   mutation_count += num_muts;
@@ -190,7 +228,9 @@ GenomeInfiniteSites::sample_effect_size(void) {
    * I want to allow the new mutation to either increase or decrease the phenotype 
    * relative to the background on which it arose. So I need to also randomly 
    * pick the sign of the effect. So with probability 0.5, the effects are 0,a,2a 
-   * and with probability 0.5 they are 0,-a,-2a. */
+   * and with probability 0.5 they are 0,-a,-2a. HAPLOID: for haploid, the effect 
+   * sizes are 0,a or 0,-a. This difference results from genotypes only having values
+   * 0,1 instead of 0,1,2. */
   if (ran1() < 0.5) sign = -1.0;
 
   while (1) {
@@ -218,6 +258,8 @@ GenomeInfiniteSites::mutate_site(mutation_loc loc, double direction) {
       pop->sites[loc].set_genotype(individual, heterozygote);
       break;
     case heterozygote:
+      if (Site::ploidy_level == haploid)
+        throw SimError("haploid populations can't mutate already mutated sites.\n");
       pop->sites[loc].set_genotype(individual, homozygote_derived);
       break;
     case homozygote_derived:
@@ -250,6 +292,8 @@ GenomeFiniteSites::mutate_site(void) {
  * twice 'up'. By default u has default value ran1() */
 void 
 GenomeFiniteSites::mutate_site(mutation_loc loc, double u) {
+  /* Here I don't need to wory about the haploid case, because that's not yet 
+   * supported for the finite sites model */
   switch (pop->sites[loc][individual]) {
     case homozygote_ancestral:
       mutant_sites.push_back(loc);

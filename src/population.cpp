@@ -35,7 +35,11 @@ void Population::initialize(int N, Model m) {
   sites_model = m;
   initialized = true;
   if (Statistic::is_activated("visits")) {
-    visits = vector<int>(2*N-1, 0);
+    if (Site::ploidy_level == diploid) {
+      visits = vector<int>(2*N-1, 0);
+    } else {
+      visits = vector<int>(N-1, 0);
+    }
   }
 }
 
@@ -79,6 +83,10 @@ void Population::setup_initial_genotypes(valarray<int> &hets, valarray<int> &hom
       loc = create_site(GenomeInfiniteSites::sample_effect_size());
     else
       loc = (mutation_loc)k;
+
+    /* haploid can't have homozygote_derived */
+    if (Site::ploidy_level == haploid && homs[k] > 0)
+      throw SimError("haploid can't have homozygote derived site");
 
     /* mutate heterozygote sites once */
     for (ind=0; ind < hets[k]; ind++) 
@@ -166,7 +174,7 @@ Population::purge_lost(void) {
           << " sojourn: " << generation-sites[loc].generation_created 
           << " effect: " << sites[loc].effect << endl;
       }
-    } else if (sites[loc].derived_alleles_count == 2*popsize && !sites[loc].reusable) {
+    } else if (sites[loc].derived_alleles_count == Site::ploidy_level*popsize && !sites[loc].reusable) {
       /* dealing with a fixed site is more complicated because we need to remove
        * it from all genomes and adjust the baseline to reflect this sites now 
        * perminant effect */
@@ -180,7 +188,7 @@ Population::purge_lost(void) {
         (*pit)->sites[loc].reusable = true; /* make the site reusable */
       }
       /* adjust the genomic baseline to reflect the fixation */
-      Genome::baseline += 2*sites[loc].effect;
+      Genome::baseline += Site::ploidy_level*sites[loc].effect;
       fixations[sites[loc].effect]++;
       if (Statistic::is_activated("sojourn")) {
         cout << "gen: " << generation << " absorption fixation site: " << sites[loc].id 
