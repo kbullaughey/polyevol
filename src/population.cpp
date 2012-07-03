@@ -25,8 +25,12 @@ int Population::popsize;
 Model Population::sites_model;
 vector<Population*> Population::pop_views;
 int Population::generation = 0;
-vector<int> Population::visits;
+
+/* static storage used by population-level statistics */
 map<double,int> Population::fixations;
+vector<int> Population::visits;
+RunningMean *Population::delta_p_first_moment;
+RunningMean *Population::delta_p_second_moment;
 
 /* Initialize the class variables of Population */
 void Population::initialize(int N, Model m) {
@@ -36,6 +40,9 @@ void Population::initialize(int N, Model m) {
   initialized = true;
   if (Statistic::is_activated("visits")) {
     visits = vector<int>(2*N-1, 0);
+  }
+  if (Statistic::is_activated("first_moment")) {
+    delta_p_first_moment = new RunningMean();
   }
 }
 
