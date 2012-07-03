@@ -2,12 +2,14 @@
 #include <ostream>
 
 #include "error_handling.h"
+#include "common.h"
 #include "site.h"
 
 using std::ostream;
 
 /* storage for (static) class variables */
 mutation_id Site::next_unique_id = 0;
+enum ploidy Site::ploidy_level;
 
 Site::Site(int N, double e, mutation_id sid, int gen) : genotypes(N) {
   effect = e;
@@ -24,17 +26,20 @@ genotype Site::operator[](int i) {
 
 /* used for assignment to a particular individual's genotype at this site */
 void Site::set_genotype(int i, genotype g) {
+//  std::cout << "setting site " << id << " in individual " << i << " to genotype " << g << " previously " << (int)genotypes[i] << std::endl;
   if (i > (int)genotypes.size()) 
     throw SimError(0, "invalid individual: %d", i);
   /* update the the allele count */
   derived_alleles_count += g - genotypes[i];
+//  std::cout << "derived_alleles_count changed to " << derived_alleles_count << std::endl;
   genotypes[i] = g;
   return;
 }
 
 /* compute the frequency of derived alleles at this site */
 double Site::frequency(void) {
-  return derived_alleles_count / (2.0 * genotypes.size());
+  double ploidy = (double)ploidy_level;
+  return derived_alleles_count / (ploidy * genotypes.size());
 }
 
 /* take a site that was lost and use it for a new mutation */

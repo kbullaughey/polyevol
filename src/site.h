@@ -37,6 +37,9 @@ public:
   /* used to dish out unique IDs */
   static mutation_id next_unique_id;
 
+  /* haploid or diploid */
+  static enum ploidy ploidy_level;
+
 private:
   /* genotypes for each individual in the population */
   std::valarray<char> genotypes;

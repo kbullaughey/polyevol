@@ -42,6 +42,7 @@ public:
    * sites which contain the genotypes of all the individuals for that site.
    * I need two storage containers to make book-keeping efficient */
   std::vector<Site> sites;
+
 private:
   std::vector<Genome*> genomes;
 

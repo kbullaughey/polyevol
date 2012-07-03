@@ -29,6 +29,8 @@ public:
   std::valarray<double> opts;                 /* vector of the optima for each epoch */
   std::valarray<int> times;                   /* times (in generations) when the epochs end */
   std::string cmd;
+  enum ploidy ploidy_level;
+  
 
   /* for fixed number of loci model */
   std::valarray<int> loci_counts;             /* vector of loci count for each effect size */

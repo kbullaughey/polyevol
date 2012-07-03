@@ -46,6 +46,7 @@ main(int argc, char **argv) { try {
 
   /* set up simulation-wide genome parameters */
   Genome::initialize(ar.mu, 2.0/ar.s, ar.opts[0], ar.env);
+  Site::ploidy_level = ar.ploidy_level;
   Population::initialize(ar.popsize, ar.sites_model);
   /* set the optimum to the first one */
   Genome::new_optimum(ar.opts[0]);
@@ -73,6 +74,8 @@ main(int argc, char **argv) { try {
 
   /* initial frequencies, read in from standard input */
   if (ar.nloci > 0) {
+    if (ar.ploidy_level == haploid) 
+      throw SimError("haploid version doesn't support frequencies on stdin");
     valarray<int> heterozygotes(ar.nloci);
     valarray<int> derived_homozygotes(ar.nloci);
     double f;
@@ -175,6 +178,7 @@ usage(void) {
     << "  --seed=<int>          seed for random number generator\n"
     << "  --burnin=<int>        number of generations of burnin discarded\n"
     << "  --env=<float>         environmental variance\n"
+    << "  --haploid             use a haploid population (default is diploid)\n"
     << "Infinite-sites-specific options:\n"
     << "  --eprobs=<double vec> effect size probabilities (comma-separated)\n"
     << "Finite-sites-specific options:\n"
@@ -187,16 +191,16 @@ usage(void) {
     << "  --enable-stat=<str>   enable a statistic\n"
     << "  --disable-stat=<str>  disable a statistic\n"
     << "  --disable-all-stats   turn off all statistics (must precede enable options)\n"
-    << "      Available statistics:\n"
+    << "      Available statistics (default):\n"
     << "        frequencies     print allele IDs and frequencies (on)\n"
     << "        phenotype       mean phenotype and variance (on)\n"
-    << "        mutation        ID and generation for each new mutation\n"
-    << "        sojourn         sojourn time in gen for infinite sites model\n"
-    << "        burnin          notices about the burnin period\n"
-    << "        visits          report (final) number of visits to each allele count\n"
-    << "        fixations       number of fixations of each effect size\n"
-    << "        segsites        number of segregating sites of each effect size\n"
-    << "        first_moment    empirical first moment of the change in allele frequency\n"
+    << "        mutation        ID and generation for each new mutation (on)\n"
+    << "        sojourn         sojourn time in gen for infinite sites model (on)\n"
+    << "        burnin          notices about the burnin period (on)\n"
+    << "        visits          report (final) number of visits to each allele count (off)\n"
+    << "        fixations       number of fixations of each effect size (off)\n"
+    << "        segsites        number of segregating sites of each effect size (off)\n"
+    << "        first_moment    empirical first moment of the change in allele frequency (off)\n"
     << "\n";
   return;
 }

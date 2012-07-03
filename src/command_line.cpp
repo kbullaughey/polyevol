@@ -25,6 +25,7 @@
 #define STATON        309
 #define STATOFF       310
 #define STATALLOFF    311
+#define HAPLOID       312
 
 using std::cerr;
 using std::cin;
@@ -66,6 +67,7 @@ Args::Args(int argc, char *argv[]) {
   rand_seed = 0;
   sites_model = unspecified;
   freqin = freqfile;
+  ploidy_level = diploid;
 
   /* process all the arguments from argv[] */
   int c;
@@ -120,6 +122,7 @@ Args::Args(int argc, char *argv[]) {
       {"enable-stat", required_argument, 0, STATON},
       {"disable-stat", required_argument, 0, STATOFF},
       {"disable-all-stats", no_argument, NULL, STATALLOFF},
+      {"haploid", no_argument, NULL, HAPLOID},
       {0, 0, 0, 0}
     };
     /* getopt_long stores the option index here. */
@@ -259,6 +262,10 @@ Args::Args(int argc, char *argv[]) {
         Statistic::deactivate_all();
         break;
 
+      case HAPLOID:
+        ploidy_level = haploid;
+        break;
+
       default:
         char o[10];
         snprintf(o, 10, "%d", c);
@@ -306,6 +313,8 @@ Args::Args(int argc, char *argv[]) {
         throw SimUsageError("negative number of loci"); 
       break;
     case finite_sites:
+      if (ploidy_level == haploid) 
+        throw SimUsageError("haploid not implemented for finite sites model");
       if (loci_counts.size() == 0) throw SimUsageError("must specify loci count(s)");
       if (loci_counts.size() != effect_sizes.size()) 
         throw SimUsageError("loci and effects must be same length");
@@ -352,6 +361,11 @@ ostream& operator<<(ostream &s, const Args &a) {
     << " freqs=\"" << freq_reverse_lookup[a.freqin] << "\""
     << " burnin=" << a.burnin;
 
+  if (a.ploidy_level == haploid) {
+    s << " ploidy=haploid";
+  } else {
+    s << " ploidy=diploid";
+  }
   string tmp;
   s << " " << print_r_vector(a.effect_sizes, "effects", tmp);
   s << " " << print_r_vector(a.opts, "opts", tmp);
