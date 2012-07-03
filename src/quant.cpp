@@ -134,6 +134,7 @@ main(int argc, char **argv) { try {
             cout << "burnin mutations: " << Genome::mutation_count << endl;
           Genome::mutation_count = 0;
         }
+        pops[OFFSPRING_POP].stat_update_p_moments();
       } else {
         ar.burnin--;
       }
@@ -148,6 +149,7 @@ main(int argc, char **argv) { try {
   pops[parent_pop].stat_phenotype_summary();
   pops[parent_pop].stat_segsites();
   Population::stat_print_visits();
+  Population::stat_print_p_moments();
   if (Statistic::is_activated("mutation")) 
     cout << "mutations: " << Genome::mutation_count << endl;
 
@@ -200,7 +202,7 @@ usage(void) {
     << "        visits          report (final) number of visits to each allele count (off)\n"
     << "        fixations       number of fixations of each effect size (off)\n"
     << "        segsites        number of segregating sites of each effect size (off)\n"
-    << "        first_moment    empirical first moment of the change in allele frequency (off)\n"
+    << "        p_moments       empirical first and second moments of the change in allele frequency (off)\n"
     << "\n";
   return;
 }

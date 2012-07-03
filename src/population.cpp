@@ -45,8 +45,16 @@ void Population::initialize(int N, Model m) {
       visits = vector<int>(N-1, 0);
     }
   }
-  if (Statistic::is_activated("first_moment")) {
-    delta_p_first_moment = new RunningMean();
+  if (Statistic::is_activated("p_moments")) {
+    int bins;
+    if (Site::ploidy_level == diploid) {
+      bins = 2*N;
+    } else {
+      bins = N;
+    }
+    /* Note, this memory is not freed until program exit */
+    delta_p_first_moment = new RunningMean(bins);
+    delta_p_second_moment = new RunningMean(bins);
   }
 }
 
@@ -148,7 +156,7 @@ Population::create_site(double e) {
   if (lost.size() > 0) {
     loc = lost.front();
     lost.pop();
-    /* go through each population view and renew use the old site for this new mutation */
+    /* go through each population view and renew the old site for this new mutation */
     for (vector<Population*>::iterator it = pop_views.begin(); it != pop_views.end(); it++)
       (*it)->sites[loc].renew(e, id, generation);   
   } else {
@@ -203,6 +211,16 @@ Population::purge_lost(void) {
           << " effect: " << sites[loc].effect << endl;
       }
     }
+  }
+}
+
+/* Return the pointer to the other population view  (there are only ever two) */
+Population* 
+Population::other_view(void) {
+  if (this == pop_views[0]) {
+    return pop_views[1];
+  } else {
+    return pop_views[0];
   }
 }
 
@@ -286,6 +304,40 @@ Population::stat_phenotype_summary(void) {
   cout << "gen: " << generation << " pheno: " << sum/popsize 
     << " " << sumsq/popsize - (sum/popsize)*(sum/popsize) << endl;
   return;
+}
+
+/* Update the estimates for the first and second moment of the change in allele
+ * frequency. Notice that the quantity we're keeping track of is not actually 
+ * the change in allele frequency, it's the change in derived allele counts. 
+ * It's left up to the user to divide by the population size */
+void
+Population::stat_update_p_moments(void) {
+  if (!Statistic::is_activated("p_moments")) return;
+
+  int delta, current_p, previous_p;
+  for (mutation_loc loc=0; loc < sites.size(); loc++) {
+    /* We only consider sites that are currently in use (sites can be waiting 
+     * to be resused if they've been lost from the population) */
+    if (!sites[loc].reusable) {
+      /* Compute the change in allele frequency between this population view and 
+       * the other view, which will be parent generation when this function is 
+       * called. In the case when the site is new, the derived_alleles_count in
+       * the parent generation (accessible via other_view) will be zero. */
+      current_p = sites[loc].derived_alleles_count;
+      previous_p = other_view()->sites[loc].derived_alleles_count;
+      delta =  current_p - previous_p;
+      delta_p_first_moment->post(current_p, (double)delta);
+      delta_p_second_moment->post(current_p, pow((double)delta, 2.0));
+    }
+  }
+}
+
+/* Print out the first and second moments for the change in allele frequency */
+void
+Population::stat_print_p_moments(void) {
+  if (!Statistic::is_activated("p_moments")) return;
+  cout << "delta_p_first_moment: " << *delta_p_first_moment << endl;
+  cout << "delta_p_second_moment: " << *delta_p_second_moment << endl;
 }
 
 /* print out the segregating sites of all individuals in the population */

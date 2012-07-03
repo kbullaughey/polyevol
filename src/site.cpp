@@ -26,12 +26,10 @@ genotype Site::operator[](int i) {
 
 /* used for assignment to a particular individual's genotype at this site */
 void Site::set_genotype(int i, genotype g) {
-//  std::cout << "setting site " << id << " in individual " << i << " to genotype " << g << " previously " << (int)genotypes[i] << std::endl;
   if (i > (int)genotypes.size()) 
     throw SimError(0, "invalid individual: %d", i);
   /* update the the allele count */
   derived_alleles_count += g - genotypes[i];
-//  std::cout << "derived_alleles_count changed to " << derived_alleles_count << std::endl;
   genotypes[i] = g;
   return;
 }
