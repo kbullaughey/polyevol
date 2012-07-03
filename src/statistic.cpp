@@ -20,6 +20,7 @@ void Statistic::initialize_defaults(void) {
   directory[string("visits")] = false;
   directory[string("fixations")] = false;
   directory[string("segsites")] = false;
+  directory[string("first_moment")] = false;
 }
 
 /* turn off all the statistics */
