@@ -1,3 +1,9 @@
+lib/*
+.libs/
+.dirstamp
+*.lo
+*.la
+*.o
 .deps/
 Makefile
 build-aux/config.h
