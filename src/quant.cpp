@@ -196,6 +196,7 @@ usage(void) {
     << "        visits          report (final) number of visits to each allele count\n"
     << "        fixations       number of fixations of each effect size\n"
     << "        segsites        number of segregating sites of each effect size\n"
+    << "        first_moment    empirical first moment of the change in allele frequency\n"
     << "\n";
   return;
 }
