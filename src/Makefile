@@ -23,7 +23,7 @@ else
   $(error Error: Unsupported platform)
 endif
 
-all: quant qapprox
+all: quant qapprox gtest
 
 quant: $(OBJS) $(HEADERS)
 	$(CC) $(CFLAGS) $(INC) $(LIBS) -o $@ $(OBJS)
@@ -33,6 +33,9 @@ qapprox: qapprox.c
 
 %.o: %.cpp $(HEADERS)
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@ 
+
+gtest:
+	$(MAKE) -C vendor/gtest
 
 clean:
 	-rm *.o quant
