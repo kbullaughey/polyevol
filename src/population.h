@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "genome.h"
+#include "running_mean.h"
 
 class Population {
 public:
@@ -72,6 +73,8 @@ private:
   /* use by statistics */
   static std::vector<int> visits;
   static std::map<double,int> fixations;
+  static RunningMean *delta_p_first_moment;
+  static RunningMean *delta_p_second_moment;
 };
 
 #endif /* __POPULATION_H__ */
