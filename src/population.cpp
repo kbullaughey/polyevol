@@ -131,8 +131,6 @@ void Population::clear_generation(void) {
       if (sites[s][i] != 0)
         throw SimError(0, "not clear: site %d in individual %d has genotype %d", sites[s].id, i, sites[s][i]);
     }
-    if (genomes[i]->mutant_sites.size() != 0)
-      throw SimError(0, "not clear: individual %d has mutant sites", i);
   }
 }
 
