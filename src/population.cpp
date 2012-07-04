@@ -48,9 +48,9 @@ void Population::initialize(int N, Model m) {
   if (Statistic::is_activated("p_moments")) {
     int bins;
     if (Site::ploidy_level == diploid) {
-      bins = 2*N;
+      bins = 2*N+1;
     } else {
-      bins = N;
+      bins = N+1;
     }
     /* Note, this memory is not freed until program exit */
     delta_p_first_moment = new RunningMean(bins);
@@ -307,14 +307,13 @@ Population::stat_phenotype_summary(void) {
 }
 
 /* Update the estimates for the first and second moment of the change in allele
- * frequency. Notice that the quantity we're keeping track of is not actually 
- * the change in allele frequency, it's the change in derived allele counts. 
- * It's left up to the user to divide by the population size */
+ * frequency. */
 void
 Population::stat_update_p_moments(void) {
   if (!Statistic::is_activated("p_moments")) return;
 
-  int delta, current_p, previous_p;
+  double delta;
+	int current_p, previous_p;
   for (mutation_loc loc=0; loc < sites.size(); loc++) {
     /* We only consider sites that are currently in use (sites can be waiting 
      * to be resused if they've been lost from the population) */
@@ -325,10 +324,10 @@ Population::stat_update_p_moments(void) {
        * the parent generation (accessible via other_view) will be zero. */
       current_p = sites[loc].derived_alleles_count;
       previous_p = other_view()->sites[loc].derived_alleles_count;
-      delta =  current_p - previous_p;
+      delta =  (double)(current_p - previous_p) / popsize;
       delta_p_first_moment->post(current_p, (double)delta);
       delta_p_second_moment->post(current_p, pow((double)delta, 2.0));
-    }
+		}
   }
 }
 
@@ -336,8 +335,8 @@ Population::stat_update_p_moments(void) {
 void
 Population::stat_print_p_moments(void) {
   if (!Statistic::is_activated("p_moments")) return;
-  cout << "delta_p_first_moment: " << *delta_p_first_moment << endl;
-  cout << "delta_p_second_moment: " << *delta_p_second_moment << endl;
+  cout << "delta_p_first_moment:" << *delta_p_first_moment << endl;
+  cout << "delta_p_second_moment:" << *delta_p_second_moment << endl;
 }
 
 /* print out the segregating sites of all individuals in the population */
