@@ -1,5 +1,6 @@
 #include "gtest/gtest.h"
 #include "running_mean.h"
+#include "error_handling.h"
 
 #include <sstream>
 #include <string>
@@ -76,6 +77,29 @@ TEST_F(RunningMeanTest, PrecisionIsCorrect) {
   EXPECT_EQ(output.str(), expected);
 }
 
+TEST_F(RunningMeanTest, PostIndexThrowsException) {
+  EXPECT_THROW(some_means.post(10,1), SimError);
+}
+
+TEST_F(RunningMeanTest, CountIndexThrowsException) {
+  EXPECT_THROW(some_means.count(10), SimError);
+}
+
+TEST_F(RunningMeanTest, SubscriptIndexThrowsException) {
+  EXPECT_THROW(some_means[10], SimError);
+}
+
+TEST_F(RunningMeanTest, PostNegativeIndexThrowsException) {
+  EXPECT_THROW(some_means.post(-10,1), SimError);
+}
+
+TEST_F(RunningMeanTest, CountNegativeIndexThrowsException) {
+  EXPECT_THROW(some_means.count(-10), SimError);
+}
+
+TEST_F(RunningMeanTest, SubscriptNegativeIndexThrowsException) {
+  EXPECT_THROW(some_means[-10], SimError);
+}
 
 
 /* END */
