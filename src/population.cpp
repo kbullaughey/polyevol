@@ -45,7 +45,7 @@ void Population::initialize(int N, Model m) {
       visits = vector<int>(N-1, 0);
     }
   }
-  if (Statistic::is_activated("p_moments")) {
+  if (Statistic::is_activated("pmoments")) {
     int bins;
     if (Site::ploidy_level == diploid) {
       bins = 2*N+1;
@@ -121,13 +121,24 @@ void Population::setup_initial_genotypes(valarray<int> &hets, valarray<int> &hom
   return;
 }
 
+void Population::clear_generation(void) {
+  /* clear out all the children's genomes */
+  for (int i = 0; i < popsize; i++) 
+    genomes[i]->clear();
+
+  for (int i = 0; i < popsize; i++) {
+    for (int s = 0; s < (int)sites.size(); s++) {
+      if (sites[s][i] != 0)
+        throw SimError(0, "not clear: site %d in individual %d has genotype %d", sites[s].id, i, sites[s][i]);
+    }
+    if (genomes[i]->mutant_sites.size() != 0)
+      throw SimError(0, "not clear: individual %d has mutant sites", i);
+  }
+}
+
 /* create the next generation (this object) from the parent generation */
 void Population::populate_from(const Population &parpop) {
   int mom, dad;
-
-  /* clear out all the children's genomes */
-  for (int off = 0; off < popsize; off++) 
-    genomes[off]->clear();
 
   /* loop over the offspring, creating each by mating two parents sampled 
    * according to their fitnesses */
@@ -158,7 +169,7 @@ Population::create_site(double e) {
     lost.pop();
     /* go through each population view and renew the old site for this new mutation */
     for (vector<Population*>::iterator it = pop_views.begin(); it != pop_views.end(); it++)
-      (*it)->sites[loc].renew(e, id, generation);   
+        (*it)->sites[loc].renew(e, id, generation);
   } else {
     loc = num_loci++;
     /* go through each population view and create a new site object */
@@ -180,8 +191,14 @@ Population::purge_lost(void) {
      * already made reusable */
     if (sites[loc].derived_alleles_count == 0 && !sites[loc].reusable) {
       /* loop through the two population views and make the site reusable */
-      for (vector<Population*>::iterator pit = pop_views.begin(); pit != pop_views.end(); pit++)
+      for (vector<Population*>::iterator pit = pop_views.begin(); pit != pop_views.end(); pit++) {
         (*pit)->sites[loc].reusable = true; /* make the site reusable */
+        (*pit)->sites[loc].reset(); /* sets all genotypes back to homozygous ancestral */
+        if ((*pit)->sites[loc].derived_alleles_count > 0) {
+          throw SimError(0, "Not reusable, derived_alleles_count is %d at site %d in population %p",
+            (*pit)->sites[loc].derived_alleles_count, (*pit)->sites[loc].id, *pit);
+        }
+      }
       /* record this site as having been lost */
       lost.push(loc);
       if (Statistic::is_activated("sojourn")) {
@@ -310,7 +327,7 @@ Population::stat_phenotype_summary(void) {
  * frequency. */
 void
 Population::stat_update_p_moments(void) {
-  if (!Statistic::is_activated("p_moments")) return;
+  if (!Statistic::is_activated("pmoments")) return;
 
   double delta;
 	int current_p, previous_p;
@@ -334,7 +351,7 @@ Population::stat_update_p_moments(void) {
 /* Print out the first and second moments for the change in allele frequency */
 void
 Population::stat_print_p_moments(void) {
-  if (!Statistic::is_activated("p_moments")) return;
+  if (!Statistic::is_activated("pmoments")) return;
   cout << "delta_p_first_moment:" << *delta_p_first_moment << endl;
   cout << "delta_p_second_moment:" << *delta_p_second_moment << endl;
 }
