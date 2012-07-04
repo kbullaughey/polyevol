@@ -47,10 +47,6 @@ Genome::initialize(double u, double sg, double opt, double env) {
 void
 Genome::clear(void) {
   for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++) {
-/*    if (pop->sites[*it][individual] > homozygote_ancestral) {
-      std::cout << "clearing site " << pop->sites[*it].id << " in individual " << individual << std::endl;
-    }
-*/
     pop->sites[*it].set_genotype(individual, homozygote_ancestral);
   }
   mutant_sites.clear();
