@@ -25,6 +25,7 @@ public:
   static void stat_print_visits(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
+  void clear_generation(void);
   void purge_lost(void);
   Population* other_view(void);
   friend std::ostream& operator<<(std::ostream &s, const Population &p);
