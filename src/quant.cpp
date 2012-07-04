@@ -120,10 +120,20 @@ main(int argc, char **argv) { try {
       /* advance the population simulation one generation */
       pops[OFFSPRING_POP].populate_from(pops[parent_pop]);
 
+      /* It's important to update the p_moments just after the next generation is
+       * generated. This is becuase stat_update_p_moments refers to the receiver
+       * (pops[OFFSPRING_POP]) as the current generation and the other population 
+       * view as the parental generation for computing changes in allele frequencies.
+       * And it's important to run it before lost sites are purged, becuase those 
+       * decreases in allele frequencies would be missed (as purged sites are not 
+       * counted) */
+      if (ar.burnin <= 0)
+        pops[OFFSPRING_POP].stat_update_p_moments();
+    
       /* if we're using the infinite sites model, we should do some cleanup */
       if (ar.sites_model == infinite_sites)
         pops[OFFSPRING_POP].purge_lost();
-    
+
       /* generations start counting after the burnin is over */
       if (ar.burnin == 0 && Population::generation == 0 && Statistic::is_activated("burnin"))
         cout << "end burnin" << endl;
@@ -134,7 +144,6 @@ main(int argc, char **argv) { try {
             cout << "burnin mutations: " << Genome::mutation_count << endl;
           Genome::mutation_count = 0;
         }
-        pops[OFFSPRING_POP].stat_update_p_moments();
       } else {
         ar.burnin--;
       }
