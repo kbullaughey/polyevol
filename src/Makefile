@@ -24,6 +24,7 @@ endif
 
 ifeq ($(PLATFORM),Linux)
   GSLLIBS = -lgsl -lgslcblas
+  GTEST_EXTRA = -lpthread
 else ifeq ($(PLATFORM),Darwin)
   GSLLIBS = -lgsl
 else
@@ -62,10 +63,11 @@ $(TEST_SUPPORT)/libgtest.a: $(TEST_SUPPORT)/gtest-all.o
 
 # Make the tests
 test/runner: test/runner.o $(TEST_OBJECTS) $(TEST_SUPPORT)/libquant.a
-	$(CC) -o test/runner $(TEST_OBJECTS) test/runner.o -Ltest/support -lgtest -lquant
+	$(CC) -o test/runner $(TEST_OBJECTS) test/runner.o -Ltest/support -lgtest -lquant $(GTEST_EXTRA)
 
 vendor_clean:
 	$(MAKE) -C vendor/gtest clean
+	-rm $(GTEST_DIR)/Makefile
 	-rm $(TEST_SUPPORT)/libgtest.a $(TEST_SUPPORT)/gtest-all.o $(TEST_SUPPORT)/libquant.a
 
 clean: 
