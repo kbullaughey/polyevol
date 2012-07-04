@@ -48,7 +48,7 @@ $(TEST_SUPPORT)/libquant.a: $(OBJS) $(HEADERS)
 	ar -rs $(TEST_SUPPORT)/libquant.a $(OBJS)
 
 # If the gtest Makefile doesn't exist, assume we need to run configure
-$(GTEST_REL)/Makefile: 
+$(GTEST_DIR)/Makefile: 
 	(cd vendor/gtest && ./configure)
 
 # Make the gtest-all.o library
