@@ -35,6 +35,7 @@ public:
   void purge_site(mutation_loc loc);
   virtual void mutate_site(mutation_loc loc, double direction) = 0;
   virtual void mutate_site(void) = 0;
+  void check(void);
 
   /* public class function */
   static void new_optimum(double);

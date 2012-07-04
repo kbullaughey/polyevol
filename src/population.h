@@ -8,6 +8,7 @@
 
 #include "common.h"
 #include "genome.h"
+#include "running_mean.h"
 
 class Population {
 public:
@@ -19,10 +20,14 @@ public:
   void stat_increment_visits(void);
   void stat_fixations(void);
   void stat_segsites(void);
+  void stat_update_p_moments(void);
+  static void stat_print_p_moments(void);
   static void stat_print_visits(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
+  void clear_generation(void);
   void purge_lost(void);
+  Population* other_view(void);
   friend std::ostream& operator<<(std::ostream &s, const Population &p);
 
   /* I need a few class functions */
@@ -73,6 +78,8 @@ private:
   /* use by statistics */
   static std::vector<int> visits;
   static std::map<double,int> fixations;
+  static RunningMean *delta_p_first_moment;
+  static RunningMean *delta_p_second_moment;
 };
 
 #endif /* __POPULATION_H__ */

@@ -1,0 +1,14 @@
+lib/*
+.libs/
+.dirstamp
+*.lo
+*.la
+*.o
+.deps/
+Makefile
+build-aux/config.h
+build-aux/stamp-h1
+config.log
+config.status
+libtool
+scripts/gtest-config

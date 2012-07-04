@@ -47,10 +47,6 @@ Genome::initialize(double u, double sg, double opt, double env) {
 void
 Genome::clear(void) {
   for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++) {
-/*    if (pop->sites[*it][individual] > homozygote_ancestral) {
-      std::cout << "clearing site " << pop->sites[*it].id << " in individual " << individual << std::endl;
-    }
-*/
     pop->sites[*it].set_genotype(individual, homozygote_ancestral);
   }
   mutant_sites.clear();
@@ -67,8 +63,10 @@ Genome::clear(void) {
 double 
 Genome::genvalue(void) {
   double sum = baseline;
-  for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++) 
+
+  for (vector<mutation_loc>::iterator it = mutant_sites.begin(); it != mutant_sites.end(); it++)
     sum += pop->sites[*it][individual] * pop->sites[*it].effect;
+
   return sum;
 }
 
@@ -76,6 +74,7 @@ Genome::genvalue(void) {
 double 
 Genome::update_phenotype(void) {
   phenotype = genvalue() + ran1()*environmental_noise;
+
   return phenotype;
 }
 
@@ -117,9 +116,9 @@ Genome::mate(Genome *mother, Genome *father) {
 
   /* now go through the father's mutations */
   for (vector<mutation_loc>::iterator it=father->mutant_sites.begin(); it != father->mutant_sites.end(); it++) {
-    enum genotype child_genotype = homozygote_ancestral;
+    enum genotype child_genotype = pop->sites[*it][individual];
     /* see if the child already has one derived allele */
-    if (pop->sites[*it][individual] > homozygote_ancestral) {
+    if (child_genotype > homozygote_ancestral) {
       /* for the haploid case, if we already have a derived allele, we can't inherit another */
       if (Site::ploidy_level == haploid) continue;
       /* if the father is not a heterozygote or we happen to sample the derived
@@ -135,7 +134,7 @@ Genome::mate(Genome *mother, Genome *father) {
        * noted, or we copy the paternal one which is necessarily derived (again, because 
        * we're here) */
       if (Site::ploidy_level == haploid) {
-        if (mother->pop->sites[*it][mother->individual] == heterozygote && pop->sites[*it][individual] == homozygote_ancestral) {
+        if (mother->pop->sites[*it][mother->individual] == heterozygote) {
           child_genotype = heterozygote;
         } else {
           if (ran1() < 0.5) child_genotype = heterozygote;
@@ -144,11 +143,11 @@ Genome::mate(Genome *mother, Genome *father) {
         if (father->pop->sites[*it][father->individual] != heterozygote || ran1() < 0.5)
           child_genotype = heterozygote;
       }
+      if (child_genotype > homozygote_ancestral)
+        mutant_sites.push_back(*it); /* add this site to the list of ones with derived alleles */
     }
-    if (child_genotype > homozygote_ancestral) {
+    if (child_genotype > homozygote_ancestral)
       pop->sites[*it].set_genotype(individual, child_genotype); /* set the genotype in the Site object */
-      mutant_sites.push_back(*it); /* add this site to the list of ones with derived alleles */
-    }
   }
   
   mutate_genome();
@@ -188,6 +187,21 @@ Genome::purge_site(mutation_loc loc) {
   vector<mutation_loc>::iterator new_end = remove(mutant_sites.begin(), mutant_sites.end(), loc);
   if (new_end != mutant_sites.end())
     mutant_sites.erase(new_end, mutant_sites.end());
+}
+
+/* Check the integrity of an individual's genome */
+void
+Genome::check(void) {
+  int derived_alleles_1 = 0;
+  int derived_alleles_2 = 0;
+  for (vector<mutation_loc>::iterator it=mutant_sites.begin(); it != mutant_sites.end(); it++) {
+    derived_alleles_1 += pop->sites[*it][individual];
+  }
+  for (int i=0; i < (int)pop->sites.size(); i++) {
+    derived_alleles_2 += pop->sites[i][individual];
+  }
+  if (derived_alleles_1 != derived_alleles_2)
+    throw SimError(0, "derived allele counts don't match: %d != %d", derived_alleles_1, derived_alleles_2);
 }
 
 /************************************************** 
