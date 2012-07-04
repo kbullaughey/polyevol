@@ -43,7 +43,7 @@ double Site::frequency(void) {
 /* take a site that was lost and use it for a new mutation */
 void Site::renew(double e, mutation_id sid, int gen) {
   if (derived_alleles_count != 0 || !reusable) 
-    throw SimError("site cannot be reused");
+    throw SimError(0, "site %d cannot be reused (alleles=%d, reusable=%d)", id, derived_alleles_count, reusable);
   effect = e;
   reusable = false;
   id = sid;
