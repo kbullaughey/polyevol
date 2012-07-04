@@ -64,13 +64,11 @@ $(TEST_SUPPORT)/libgtest.a: $(TEST_SUPPORT)/gtest-all.o
 test/runner: test/runner.o $(TEST_OBJECTS) $(TEST_SUPPORT)/libquant.a
 	$(CC) -o test/runner $(TEST_OBJECTS) test/runner.o -Ltest/support -lgtest -lquant
 
-blah:
-	echo $(TESTS)
-	echo $(TEST_OBJECTS)
-
-clean:
-	-rm *.o quant
-	-rm libgtest.a gtest-all.o
+vendor_clean:
 	$(MAKE) -C vendor/gtest clean
+	-rm $(TEST_SUPPORT)/libgtest.a $(TEST_SUPPORT)/gtest-all.o $(TEST_SUPPORT)/libquant.a
+
+clean: 
+	-rm *.o quant
 
 # END
