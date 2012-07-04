@@ -7,6 +7,15 @@ Try this once inside the 'src' directory:
     cd examples
     ./run.sh
 
+Tests
+-----
+
+I use [Google Test][gtest] for performing xUnit-style unit testing. I include version 1.6.0 in the repository, and running `make` from `src` will also build gtest itself as well as the tests. Tests are located in `tests/`, and can be run as follows:
+
+    test/runner
+
+[gtest]: http://code.google.com/p/googletest/
+
 Requirements
 ------------
 
