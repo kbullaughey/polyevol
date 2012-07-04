@@ -11,6 +11,7 @@ RunningMean::RunningMean(int size) : means(size), counts(size) {
 
 /* add a sample to the mean at index i */
 void RunningMean::post(int i, double s) {
+  if (i < 0) throw SimError("cannot tolerate a negative index");
   if (i >= _size) throw SimError("index exceeds size of RunningMean instance"); 
   means[i] = ((means[i] * counts[i]) + s) / (counts[i] + 1.0);
   counts[i] += 1.0;
@@ -18,11 +19,15 @@ void RunningMean::post(int i, double s) {
 
 /* Get the mean at index i */
 double RunningMean::operator[](const int i) const {
+  if (i < 0) throw SimError("cannot tolerate a negative index");
+  if (i >= _size) throw SimError("index exceeds size of RunningMean instance"); 
   return means[i];
 }
 
 /* How many times the mean at index i was posted to */
 int RunningMean::count(int i) const {
+  if (i < 0) throw SimError("cannot tolerate a negative index");
+  if (i >= _size) throw SimError("index exceeds size of RunningMean instance"); 
   return (int)counts[i];
 }
 
