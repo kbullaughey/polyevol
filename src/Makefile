@@ -45,7 +45,7 @@ test/%.o: test/%.cpp
 	$(CC) $(CFLAGS) $(INC) -c $< -o $@ 
 
 $(TEST_SUPPORT)/libquant.a: $(OBJS) $(HEADERS)
-	ar -rvs $(TEST_SUPPORT)/libquant.a $(OBJS)
+	ar -rs $(TEST_SUPPORT)/libquant.a $(OBJS)
 
 # If the gtest Makefile doesn't exist, assume we need to run configure
 $(GTEST_REL)/Makefile: 
@@ -58,7 +58,7 @@ $(TEST_SUPPORT)/gtest-all.o: $(GTEST_DIR)/Makefile
 
 # Make the gtest static library
 $(TEST_SUPPORT)/libgtest.a: $(TEST_SUPPORT)/gtest-all.o
-	ar -rvs $(TEST_SUPPORT)/libgtest.a $(TEST_SUPPORT)/gtest-all.o
+	ar -rs $(TEST_SUPPORT)/libgtest.a $(TEST_SUPPORT)/gtest-all.o
 
 # Make the tests
 test/runner: test/runner.o $(TEST_OBJECTS) $(TEST_SUPPORT)/libquant.a
