@@ -31,6 +31,7 @@ map<double,int> Population::fixations;
 vector<int> Population::visits;
 RunningMean *Population::delta_p_first_moment;
 RunningMean *Population::delta_p_second_moment;
+RunningMean *Population::phenotype_var_mean;
 
 /* Initialize the class variables of Population */
 void Population::initialize(int N, Model m) {
@@ -55,6 +56,10 @@ void Population::initialize(int N, Model m) {
     /* Note, this memory is not freed until program exit */
     delta_p_first_moment = new RunningMean(bins);
     delta_p_second_moment = new RunningMean(bins);
+  }
+  if (Statistic::is_activated("phenotype-var-mean")) {
+    /* Note, this memory is not freed until program exit */
+    phenotype_var_mean = new RunningMean(1);
   }
 }
 
@@ -304,20 +309,36 @@ Population::stat_segsites(void) {
   return;
 }
 
+/* Since multiple statistics use the phenotype moments, we compute them here 
+ * and store them in the Phenotype object
+ */
+void
+Population::compute_phenotype_moments(void) {
+  double sum, sumsq, p;
+
+  if (Statistic::is_activated("phenotype") || Statistic::is_activated("phenotype-var-mean")) {
+    sum = sumsq = 0.0;
+    
+    for (int ind=0; ind < popsize; ind++) {
+      p = genomes[ind]->phenotype;
+      sum += p;
+      sumsq += p*p;
+    }
+  
+    phenotype_mean = sum/popsize;
+    phenotype_variance = sumsq/popsize - (sum/popsize)*(sum/popsize);
+  }
+}
+
 /* print out the phenotype mean and variance */
 void
 Population::stat_phenotype_summary(void) {
   if (!Statistic::is_activated("phenotype")) return;
 
-  double sum, sumsq, p;
-  sum = sumsq = 0.0;
-  for (int ind=0; ind < popsize; ind++) {
-    p = genomes[ind]->phenotype;
-    sum += p;
-    sumsq += p*p;
-  }
-  cout << "gen: " << generation << " pheno: " << sum/popsize 
-    << " " << sumsq/popsize - (sum/popsize)*(sum/popsize) << endl;
+  /* compute_phenotype_moments must be called before this function will return 
+   * accurate results */
+  cout << "gen: " << generation << " pheno: " << phenotype_mean
+    << " " << phenotype_variance << endl;
   return;
 }
 
@@ -345,6 +366,21 @@ Population::stat_update_p_moments(void) {
 		}
   }
 }
+
+void
+Population::stat_update_phenotype_var_mean(void) {
+  if (!Statistic::is_activated("phenotype-var-mean")) return;
+  phenotype_var_mean->post(phenotype_variance);
+}
+
+/* Print out the mean (over generations) of the generation-wise phenotype 
+ * variance */
+void
+Population::stat_print_phenotype_var_mean(void) {
+  if (!Statistic::is_activated("phenotype-var-mean")) return;
+  cout << "phenotype_var_mean:" << (*phenotype_var_mean)[0] << endl;
+}
+
 
 /* Print out the first and second moments for the change in allele frequency */
 void

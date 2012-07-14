@@ -9,6 +9,12 @@ RunningMean::RunningMean(int size) : means(size), counts(size) {
   _size = size;
 }
 
+/* For the special case where we're only storing a single running mean in this 
+ * object, add a sample to the mean at index 0 */
+void RunningMean::post(double s) {
+  post(0, s);
+}
+
 /* add a sample to the mean at index i */
 void RunningMean::post(int i, double s) {
   if (i < 0) throw SimError("cannot tolerate a negative index");

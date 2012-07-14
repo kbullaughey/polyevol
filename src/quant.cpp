@@ -111,10 +111,15 @@ main(int argc, char **argv) { try {
       /* only print output if we've discarded the burnin */
       if (ar.burnin <= 0) {
         pops[parent_pop].stat_frequency_summary();
-        pops[parent_pop].stat_phenotype_summary();
         pops[parent_pop].stat_increment_visits();
         pops[parent_pop].stat_fixations();
         pops[parent_pop].stat_segsites();
+
+        /* first compute the phenotype moments, so the next two statistics can 
+         * use them */
+        pops[parent_pop].compute_phenotype_moments();
+        pops[parent_pop].stat_phenotype_summary();
+        pops[parent_pop].stat_update_phenotype_var_mean();
       } 
 
       /* advance the population simulation one generation */
@@ -167,10 +172,16 @@ main(int argc, char **argv) { try {
 
   /* print the final state */
   pops[parent_pop].stat_frequency_summary();
+  pops[parent_pop].compute_phenotype_moments();
   pops[parent_pop].stat_phenotype_summary();
   pops[parent_pop].stat_segsites();
   Population::stat_print_visits();
   Population::stat_print_p_moments();
+  /* update the phenotype_var_mean one last time. It will be an average over 
+   * g+1 generations, including the initial population and g offspring 
+   * populations */
+  pops[parent_pop].stat_update_phenotype_var_mean();
+  pops[parent_pop].stat_print_phenotype_var_mean();
   if (Statistic::is_activated("mutation")) 
     cout << "mutations: " << Genome::mutation_count << endl;
 
@@ -215,15 +226,16 @@ usage(void) {
     << "  --disable-stat=<str>  disable a statistic\n"
     << "  --disable-all-stats   turn off all statistics (must precede enable options)\n"
     << "      Available statistics (default):\n"
-    << "        frequencies     print allele IDs and frequencies (on)\n"
-    << "        phenotype       mean phenotype and variance (on)\n"
-    << "        mutation        ID and generation for each new mutation (on)\n"
-    << "        sojourn         sojourn time in gen for infinite sites model (on)\n"
-    << "        burnin          notices about the burnin period (on)\n"
-    << "        visits          report (final) number of visits to each allele count (off)\n"
-    << "        fixations       number of fixations of each effect size (off)\n"
-    << "        segsites        number of segregating sites of each effect size (off)\n"
-    << "        pmoments        empirical first and second moments of the change in allele frequency (off)\n"
+    << "        frequencies         print allele IDs and frequencies (on)\n"
+    << "        phenotype           mean phenotype and variance (on)\n"
+    << "        phenotype-var-mean  mean (over generations) of each generation's phenotype variance (off)\n"
+    << "        mutation            ID and generation for each new mutation (on)\n"
+    << "        sojourn             sojourn time in gen for infinite sites model (on)\n"
+    << "        burnin              notices about the burnin period (on)\n"
+    << "        visits              report (final) number of visits to each allele count (off)\n"
+    << "        fixations           number of fixations of each effect size (off)\n"
+    << "        segsites            number of segregating sites of each effect size (off)\n"
+    << "        pmoments            empirical first and second moments of the change in allele frequency (off)\n"
     << "\n";
   return;
 }

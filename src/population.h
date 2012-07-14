@@ -21,8 +21,11 @@ public:
   void stat_fixations(void);
   void stat_segsites(void);
   void stat_update_p_moments(void);
+  void stat_update_phenotype_var_mean(void);
+  void stat_print_phenotype_var_mean(void);
   static void stat_print_p_moments(void);
   static void stat_print_visits(void);
+  void compute_phenotype_moments(void);
   void record_genotype(int indiv, mutation_loc loc, genotype g);
   void populate_from(const Population &parpop);
   void clear_generation(void);
@@ -49,6 +52,10 @@ public:
 
 private:
   std::vector<Genome*> genomes;
+
+  /* These are only used by statistics, if requested */
+  double phenotype_mean;
+  double phenotype_variance;
 
   /* stuff below here is common to all populations */
 
@@ -80,6 +87,7 @@ private:
   static std::map<double,int> fixations;
   static RunningMean *delta_p_first_moment;
   static RunningMean *delta_p_second_moment;
+  static RunningMean *phenotype_var_mean;
 };
 
 #endif /* __POPULATION_H__ */

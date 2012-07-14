@@ -11,6 +11,7 @@ public:
   ~RunningMean() { }
 
   void post(int i, double value);
+  void post(double value);
   int size(void) const;
   int count(int i) const;
 

@@ -14,6 +14,7 @@ map<string,bool> Statistic::directory;
 void Statistic::initialize_defaults(void) {
   directory[string("frequencies")] = true;
   directory[string("phenotype")] = true;
+  directory[string("phenotype-var-mean")] = false;
   directory[string("burnin")] = true;
   directory[string("sojourn")] = true;
   directory[string("mutation")] = true;
