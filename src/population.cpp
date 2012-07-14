@@ -378,7 +378,7 @@ Population::stat_update_phenotype_var_mean(void) {
 void
 Population::stat_print_phenotype_var_mean(void) {
   if (!Statistic::is_activated("phenotype-var-mean")) return;
-  cout << "phenotype_var_mean:" << (*phenotype_var_mean)[0] << endl;
+  cout << "gen: " << generation << " phenotype_var_mean: " << (*phenotype_var_mean)[0] << endl;
 }
 
 
@@ -386,8 +386,8 @@ Population::stat_print_phenotype_var_mean(void) {
 void
 Population::stat_print_p_moments(void) {
   if (!Statistic::is_activated("pmoments")) return;
-  cout << "delta_p_first_moment:" << *delta_p_first_moment << endl;
-  cout << "delta_p_second_moment:" << *delta_p_second_moment << endl;
+  cout << "gen: " << generation << " delta_p_first_moment:" << *delta_p_first_moment << endl;
+  cout << "gen: " << generation << " delta_p_second_moment:" << *delta_p_second_moment << endl;
 }
 
 /* print out the segregating sites of all individuals in the population */
