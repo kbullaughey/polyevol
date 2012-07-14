@@ -361,8 +361,8 @@ Population::stat_update_p_moments(void) {
       current_p = sites[loc].derived_alleles_count;
       previous_p = other_view()->sites[loc].derived_alleles_count;
       delta =  (double)(current_p - previous_p) / popsize;
-      delta_p_first_moment->post(current_p, (double)delta);
-      delta_p_second_moment->post(current_p, pow((double)delta, 2.0));
+      delta_p_first_moment->post(previous_p, (double)delta);
+      delta_p_second_moment->post(previous_p, pow((double)delta, 2.0));
 		}
   }
 }
